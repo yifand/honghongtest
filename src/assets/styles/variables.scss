@@ -1,0 +1,52 @@
+// Colors
+$bg-primary: #020617;
+$bg-secondary: #0f172a;
+$bg-tertiary: #1e3a5f;
+$blue-500: #3b82f6;
+$cyan-400: #06b6d4;
+$cyan-500: #06b6d4;
+$purple-500: #8b5cf6;
+$orange-500: #f97316;
+$green-400: #4ade80;
+$text-white: #ffffff;
+$text-gray-300: #d1d5db;
+$text-gray-400: #9ca3af;
+$text-gray-500: #6b7280;
+$border-color: rgba(255, 255, 255, 0.1);
+
+// Spacing
+$section-padding: 80px 0;
+$container-max-width: 1280px;
+$container-max-width2: 1080px;
+
+// Mixins
+@mixin glass {
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(20px);
+  border: 1px solid $border-color;
+}
+
+@mixin glass-light {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid $border-color;
+}
+
+@mixin text-gradient {
+  background: linear-gradient(135deg, $blue-500 0%, $cyan-400 50%, $purple-500 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+@mixin glow-blue {
+  box-shadow: 0 0 40px rgba(59, 130, 246, 0.3);
+}
+
+@mixin card-hover {
+  transition: all 0.3s ease;
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(59, 130, 246, 0.2);
+  }
+}
