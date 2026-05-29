@@ -1,11 +1,14 @@
 <template>
   <div class="not-found-page">
+    <el-button size="small" class="lang-btn" @click="toggleLang">
+      {{ langLabel }}
+    </el-button>
     <div class="not-found-content">
       <div class="error-code">404</div>
-      <h1 class="error-title">{{ $t('not_found_title') || '页面不存在' }}</h1>
-      <p class="error-desc">{{ $t('not_found_desc') || '您访问的页面可能已被移除或地址输入有误' }}</p>
+      <h1 class="error-title">{{ $t('not_found_title') }}</h1>
+      <p class="error-desc">{{ $t('not_found_desc') }}</p>
       <el-button type="primary" class="back-btn" @click="$router.push('/')">
-        {{ $t('back_home') || '返回首页' }}
+        {{ $t('back_home') }}
       </el-button>
     </div>
   </div>
@@ -13,7 +16,19 @@
 
 <script>
 export default {
-  name: 'NotFound'
+  name: 'NotFound',
+  computed: {
+    langLabel() {
+      return this.$i18n.locale === 'en' ? 'EN' : '中文'
+    }
+  },
+  methods: {
+    toggleLang() {
+      const newLang = this.$i18n.locale === 'en' ? 'zh' : 'en'
+      this.$i18n.locale = newLang
+      this.$store.commit('SET_LANG', newLang)
+    }
+  }
 }
 </script>
 
@@ -23,6 +38,23 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+}
+
+.lang-btn {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  color: #d1d5db;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 6px;
+  font-size: 13px;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #fff;
+  }
 }
 
 .not-found-content {
