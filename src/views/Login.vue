@@ -57,9 +57,31 @@ export default {
     }
   },
   methods: {
-    handleLogin() {
-      this.$store.dispatch('login')
-      this.$router.push('/dashboard/overview')
+    async handleLogin() {
+      if (!this.form.email || !this.form.password) {
+        this.$message.warning('请输入邮箱和密码')
+        return
+      }
+
+      try {
+        // 接入真实后端时，取消下面注释并传入实际参数
+        // const { authApi } = require('@/services')
+        // const res = await authApi.login({
+        //   email: this.form.email,
+        //   password: this.form.password
+        // })
+        // const token = res.data.token
+
+        // 模拟登录，生成临时 token
+        const token = 'mock_token_' + Date.now()
+
+        this.$store.dispatch('login', token)
+        const redirect = this.$route.query.redirect || '/dashboard/overview'
+        this.$router.push(redirect)
+        this.$message.success('登录成功')
+      } catch (error) {
+        this.$message.error(error.message || '登录失败')
+      }
     }
   }
 }

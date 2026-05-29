@@ -4,11 +4,13 @@ import Vuex from 'vuex'
 Vue.use(Vuex)
 
 const savedLang = localStorage.getItem('app_lang') || 'en'
+const savedToken = localStorage.getItem('token') || ''
 
 export default new Vuex.Store({
   state: {
     lang: savedLang,
-    isLoggedIn: false
+    isLoggedIn: !!savedToken,
+    token: savedToken
   },
   mutations: {
     SET_LANG(state, lang) {
@@ -17,6 +19,15 @@ export default new Vuex.Store({
     },
     SET_LOGIN(state, status) {
       state.isLoggedIn = status
+    },
+    SET_TOKEN(state, token) {
+      state.token = token
+      state.isLoggedIn = !!token
+      if (token) {
+        localStorage.setItem('token', token)
+      } else {
+        localStorage.removeItem('token')
+      }
     }
   },
   actions: {
@@ -24,10 +35,11 @@ export default new Vuex.Store({
       const newLang = state.lang === 'en' ? 'zh' : 'en'
       commit('SET_LANG', newLang)
     },
-    login({ commit }) {
-      commit('SET_LOGIN', true)
+    login({ commit }, token) {
+      commit('SET_TOKEN', token)
     },
     logout({ commit }) {
+      commit('SET_TOKEN', '')
       commit('SET_LOGIN', false)
     }
   }
