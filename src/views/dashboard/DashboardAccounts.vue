@@ -8,15 +8,36 @@
       <div class="filter-row">
         <el-input v-model="filters.name" :placeholder="$t('account_name')" size="small" class="filter-input" />
         <el-input v-model="filters.enterprise" :placeholder="$t('enterprise_name')" size="small" class="filter-input" />
-        <el-select v-model="filters.svcType" :placeholder="$t('service_type')" size="small" class="filter-input" clearable>
+        <el-select v-model="filters.svcType" :placeholder="$t('service_type')" size="small" class="filter-input"
+          clearable>
           <el-option value="" :label="$t('all_types')" />
           <el-option value="NRTK" label="NRTK" />
           <el-option value="PPP-RTK" label="PPP-RTK" />
         </el-select>
-        <el-select v-model="filters.activated" :placeholder="$t('activation_status')" size="small" class="filter-input" clearable>
+        <el-select v-model="filters.activated" :placeholder="$t('activation_status')" size="small" class="filter-input"
+          clearable>
           <el-option value="" :label="$t('all_status')" />
           <el-option value="activated" :label="$t('activated')" />
           <el-option value="inactive" :label="$t('inactive')" />
+        </el-select>
+        <el-select v-model="filters.mode" :placeholder="$t('account_mode')" size="small" class="filter-input" clearable>
+          <el-option value="" :label="$t('all_modes')" />
+          <el-option value="Ntrip" label="Ntrip" />
+          <el-option value="SDK" label="SDK" />
+        </el-select>
+        <el-select v-model="filters.spec" :placeholder="$t('account_spec')" size="small" class="filter-input" clearable>
+          <el-option value="" :label="$t('all_specs')" />
+          <el-option value="year" :label="$t('year')" />
+          <el-option value="month" :label="$t('month')" />
+          <el-option value="day" :label="$t('day')" />
+        </el-select>
+        <el-select v-model="filters.device" :placeholder="$t('device_type')" size="small" class="filter-input"
+          clearable>
+          <el-option value="" :label="$t('all_devices')" />
+          <el-option value="GNSS-Receiver-V3" label="GNSS-Receiver-V3" />
+          <el-option value="Drone-M300-RTK" label="Drone-M300-RTK" />
+          <el-option value="Agri-Drone-P100" label="Agri-Drone-P100" />
+          <el-option value="RoboTaxi-Gen5" label="RoboTaxi-Gen5" />
         </el-select>
         <el-button size="small" class="btn-search" @click="applyFilter">{{ $t('search') }}</el-button>
         <el-button size="small" class="btn-reset" @click="resetFilter">{{ $t('reset') }}</el-button>
@@ -32,13 +53,16 @@
         </el-table-column>
         <el-table-column prop="password" :label="$t('password')">
           <template slot-scope="scope">
-            <span class="text-gray text-xs">••••••••</span>
+            <span class="text-gray text-xs">
+              {{ visiblePasswordIds[scope.row.id] ? scope.row.password : '••••••••' }}
+            </span>
           </template>
         </el-table-column>
         <el-table-column prop="enterprise" :label="$t('enterprise_name')" />
         <el-table-column prop="svcType" :label="$t('service_type')" width="100">
           <template slot-scope="scope">
-            <el-tag :type="scope.row.svcType === 'NRTK' ? 'primary' : 'info'" size="mini">{{ scope.row.svcType }}</el-tag>
+            <el-tag :type="scope.row.svcType === 'NRTK' ? 'primary' : 'info'" size="mini">{{ scope.row.svcType
+              }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="mode" :label="$t('account_mode')" />
@@ -47,15 +71,18 @@
         </el-table-column>
         <el-table-column prop="activated" :label="$t('activation_status')" width="100">
           <template slot-scope="scope">
-            <el-tag :type="scope.row.activated === 'activated' ? 'success' : 'info'" size="mini">{{ scope.row.activated }}</el-tag>
+            <el-tag :type="scope.row.activated === 'activated' ? 'success' : 'info'" size="mini">{{ scope.row.activated
+              }}</el-tag>
           </template>
         </el-table-column>
+        <el-table-column prop="activationTime" :label="$t('activation_time')" width="120" />
         <el-table-column prop="created" :label="$t('created_time')" width="100" />
         <el-table-column prop="expires" :label="$t('expire_time')" width="100" />
         <el-table-column :label="$t('actions')" width="140">
           <template slot-scope="scope">
-            <el-button type="text" size="mini" @click="showPassword(scope.row)">Show</el-button>
-            <el-button type="text" size="mini" class="text-green" @click="openPasswordModal(scope.row)">Chg Pwd</el-button>
+            <el-button type="text" size="mini" @click="showPassword(scope.row)">{{ $t('show') }}</el-button>
+            <el-button type="text" size="mini" class="text-green" @click="openPasswordModal(scope.row)">{{
+              $t('change_password_short') }}</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -68,12 +95,12 @@
           <el-input v-model="passwordForm.name" readonly />
         </el-form-item>
         <el-form-item :label="$t('new_password')">
-          <el-input v-model="passwordForm.newPassword" />
+          <el-input v-model="passwordForm.newPassword" :placeholder="$t('placeholder_new_password')" />
         </el-form-item>
       </el-form>
       <span slot="footer">
         <el-button type="primary" size="small" @click="handleSavePassword">{{ $t('confirm') }}</el-button>
-        <el-button size="small" @click="modalVisible = false">{{ $t('cancel') }}</el-button>
+        <el-button size="small" class="btn-reset" @click="modalVisible = false">{{ $t('cancel') }}</el-button>
       </span>
     </el-dialog>
   </div>
@@ -81,15 +108,17 @@
 
 <script>
 import { DB, updatePassword, exportAccountsCSV } from '@/data/dashboardDB'
-
+import { STATUSENUM } from '@/common/js/const'
 export default {
   name: 'DashboardAccounts',
   data() {
     return {
       DB,
-      filters: { name: '', enterprise: '', svcType: '', activated: '' },
+      filters: { name: '', enterprise: '', svcType: '', activated: '', mode: '', spec: '', device: '' },
       modalVisible: false,
-      passwordForm: { id: null, name: '', newPassword: '' }
+      passwordForm: { id: null, name: '', newPassword: '' },
+      visiblePasswordIds: {},
+      statusList: STATUSENUM
     }
   },
   computed: {
@@ -99,13 +128,16 @@ export default {
         const matchEnt = !this.filters.enterprise || a.enterprise.toLowerCase().includes(this.filters.enterprise.toLowerCase())
         const matchType = !this.filters.svcType || a.svcType === this.filters.svcType
         const matchStatus = !this.filters.activated || a.activated === this.filters.activated
-        return matchName && matchEnt && matchType && matchStatus
+        const matchMode = !this.filters.mode || a.mode === this.filters.mode
+        const matchSpec = !this.filters.spec || a.spec === this.filters.spec
+        const matchDevice = !this.filters.device || a.device === this.filters.device
+        return matchName && matchEnt && matchType && matchStatus && matchMode && matchSpec && matchDevice
       })
     }
   },
   methods: {
     showPassword(row) {
-      this.$alert('Account: ' + row.name + '\nPassword: ' + row.password, 'Account Password', { confirmButtonText: 'OK' })
+      this.$alert(this.$t('account_label') + ': ' + row.name + '\n' + this.$t('password_label') + ': ' + row.password, this.$t('account_password_title'), { confirmButtonText: this.$t('ok') }).catch(() => { })
     },
     openPasswordModal(row) {
       this.passwordForm = { id: row.id, name: row.name, newPassword: '' }
@@ -118,7 +150,7 @@ export default {
     exportAccountsCSV,
     applyFilter() { /* reactive */ },
     resetFilter() {
-      this.filters = { name: '', enterprise: '', svcType: '', activated: '' }
+      this.filters = { name: '', enterprise: '', svcType: '', activated: '', mode: '', spec: '', device: '' }
     }
   }
 }

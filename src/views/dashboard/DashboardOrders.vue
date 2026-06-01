@@ -6,11 +6,27 @@
     </div>
     <el-card class="glass filter-card">
       <div class="filter-row">
+        <el-input v-model="filters.title" :placeholder="$t('order_title')" size="small" class="filter-input" />
+        <el-input v-model="filters.orderNo" :placeholder="$t('order_id')" size="small" class="filter-input" />
         <el-input v-model="filters.enterprise" :placeholder="$t('enterprise_name')" size="small" class="filter-input" />
+        <el-select v-model="filters.partner" :placeholder="$t('partner_name')" size="small" class="filter-input" clearable>
+          <el-option v-for="item in partnerOptions" :key="item.code" :label="item.name" :value="item.code" />
+        </el-select>
         <el-select v-model="filters.svcType" :placeholder="$t('service_type')" size="small" class="filter-input" clearable>
           <el-option value="" :label="$t('all_types')" />
           <el-option value="NRTK" label="NRTK" />
           <el-option value="PPP-RTK" label="PPP-RTK" />
+        </el-select>
+        <el-select v-model="filters.acctMode" :placeholder="$t('account_mode')" size="small" class="filter-input" clearable>
+          <el-option value="" :label="$t('all_account_modes')" />
+          <el-option value="Ntrip" label="Ntrip" />
+          <el-option value="SDK" label="SDK" />
+        </el-select>
+        <el-select v-model="filters.spec" :placeholder="$t('account_spec')" size="small" class="filter-input" clearable>
+          <el-option value="" :label="$t('all_account_specs')" />
+          <el-option value="year" label="Year" />
+          <el-option value="month" label="Month" />
+          <el-option value="day" label="Day" />
         </el-select>
         <el-select v-model="filters.status" :placeholder="$t('status')" size="small" class="filter-input" clearable>
           <el-option value="" :label="$t('all_status')" />
@@ -25,6 +41,7 @@
       <el-table :data="filteredOrders" size="small" class="dark-table">
         <el-table-column prop="id" label="#" width="60" />
         <el-table-column prop="enterprise" :label="$t('enterprise_name')" />
+        <el-table-column prop="partner" :label="$t('partner_name')" width="120" />
         <el-table-column prop="title" :label="$t('order_title')" />
         <el-table-column prop="orderNo" :label="$t('order_id')" width="130">
           <template slot-scope="scope">
@@ -41,6 +58,9 @@
           <template slot-scope="scope">{{ scope.row.spec }}/{{ scope.row.stack }}</template>
         </el-table-column>
         <el-table-column prop="qty" :label="$t('quantity')" width="70" />
+        <el-table-column prop="device" :label="$t('device_type')" width="140" />
+        <el-table-column prop="accountList" :label="$t('account_list')" min-width="160" show-overflow-tooltip />
+        <el-table-column prop="created" :label="$t('created_time')" width="110" />
         <el-table-column prop="status" :label="$t('status')" width="100">
           <template slot-scope="scope">
             <el-tag :type="scope.row.status === 'pushed' ? 'success' : 'warning'" size="mini">
@@ -50,70 +70,166 @@
         </el-table-column>
         <el-table-column :label="$t('actions')" width="180">
           <template slot-scope="scope">
-            <el-button type="text" size="mini" @click="viewOrderDetail(scope.row)">Detail</el-button>
+            <el-button type="text" size="mini" @click="viewOrderDetail(scope.row)">{{ $t('detail') }}</el-button>
             <el-button v-if="scope.row.status === 'unpushed'" type="text" size="mini" class="text-green" @click="openOrderModal(scope.row)">{{ $t('edit') }}</el-button>
-            <el-button v-if="scope.row.status === 'unpushed'" type="text" size="mini" class="text-orange" @click="handlePushOrder(scope.row.id)">Push</el-button>
+            <el-button v-if="scope.row.status === 'unpushed'" type="text" size="mini" class="text-orange" @click="handlePushOrder(scope.row.id)">{{ $t('push') }}</el-button>
           </template>
         </el-table-column>
       </el-table>
     </el-card>
 
+    <!-- Order Detail Dialog -->
+    <el-dialog :title="$t('order_detail_title')" :visible.sync="detailVisible" width="520px" custom-class="dark-dialog">
+      <div class="detail-body">
+        <div class="detail-header">
+          <div class="detail-no">{{ detailRow.orderNo }}</div>
+          <div class="detail-title">{{ detailRow.title }}</div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-row">
+            <div class="detail-item">
+              <span class="detail-label">{{ $t('order_enterprise_label') }}</span>
+              <span class="detail-value">{{ detailRow.enterprise }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{{ $t('order_partner_label') }}</span>
+              <span class="detail-value">{{ detailRow.partner }}</span>
+            </div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-item">
+              <span class="detail-label">{{ $t('order_service_label') }}</span>
+              <span class="detail-value">
+                <el-tag :type="detailRow.svcType === 'NRTK' ? 'primary' : 'info'" size="mini">{{ detailRow.svcType }}</el-tag>
+              </span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{{ $t('order_mode_label') }}</span>
+              <span class="detail-value">{{ detailRow.acctMode }}</span>
+            </div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-item">
+              <span class="detail-label">{{ $t('order_created_label') }}</span>
+              <span class="detail-value">{{ detailRow.created }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="detail-divider" />
+        <div class="detail-section">
+          <div class="detail-row three">
+            <div class="detail-item">
+              <span class="detail-label">{{ $t('order_spec_label') }}</span>
+              <span class="detail-value">{{ detailRow.spec }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{{ $t('order_stack_label') }}</span>
+              <span class="detail-value">{{ detailRow.stack }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{{ $t('order_qty_label') }}</span>
+              <span class="detail-value">{{ detailRow.qty }}</span>
+            </div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-item">
+              <span class="detail-label">{{ $t('order_device_label') }}</span>
+              <span class="detail-value">{{ detailRow.device || '-' }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="detail-divider" />
+        <div class="detail-section">
+          <div class="detail-row">
+            <div class="detail-item full">
+              <span class="detail-label">{{ $t('order_accounts_label') }}</span>
+              <span class="detail-value">{{ detailRow.accountList || '-' }}</span>
+            </div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-item">
+              <span class="detail-label">{{ $t('order_status_label') }}</span>
+              <span class="detail-value">
+                <el-tag :type="detailRow.status === 'pushed' ? 'success' : 'warning'" size="mini">{{ detailRow.status === 'pushed' ? $t('pushed') : $t('unpushed') }}</el-tag>
+              </span>
+            </div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-item full">
+              <span class="detail-label">{{ $t('order_notes_label') }}</span>
+              <span class="detail-value text-muted">{{ detailRow.notes || '-' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <span slot="footer">
+        <el-button type="primary" size="small" @click="detailVisible = false">{{ $t('ok') }}</el-button>
+      </span>
+    </el-dialog>
+
     <!-- Order Modal -->
     <el-dialog :title="form.id ? $t('edit_order') : $t('add_order')" :visible.sync="modalVisible" width="640px" custom-class="dark-dialog">
-      <el-form :model="form" label-position="top" size="small">
+      <el-form ref="orderForm" :model="form" :rules="rules" label-position="top" size="small">
         <div class="form-row">
-          <el-form-item :label="$t('enterprise_name')" class="form-col">
+          <el-form-item prop="enterprise" :label="$t('enterprise_name')" class="form-col">
             <el-select v-model="form.enterprise" style="width: 100%">
               <el-option v-for="u in DB.users" :key="u.id" :label="u.enterprise" :value="u.enterprise" />
             </el-select>
           </el-form-item>
-          <el-form-item :label="$t('order_title')" class="form-col">
-            <el-input v-model="form.title" placeholder="e.g. ZNJS001_Ntrip" />
+          <el-form-item prop="title" :label="$t('order_title')" class="form-col">
+            <el-input v-model="form.title" :placeholder="$t('placeholder_order')" />
           </el-form-item>
         </div>
         <div class="form-row">
-          <el-form-item :label="$t('service_type')" class="form-col">
+          <el-form-item prop="svcType" :label="$t('service_type')" class="form-col">
             <el-select v-model="form.svcType" style="width: 100%" @change="onSvcTypeChange">
               <el-option value="NRTK" label="NRTK" />
               <el-option value="PPP-RTK" label="PPP-RTK" />
             </el-select>
           </el-form-item>
-          <el-form-item :label="$t('account_mode')" class="form-col">
+          <el-form-item prop="acctMode" :label="$t('account_mode')" class="form-col">
             <el-select v-model="form.acctMode" style="width: 100%">
               <el-option v-for="opt in modeOptions" :key="opt" :label="opt" :value="opt" />
             </el-select>
           </el-form-item>
         </div>
         <div class="form-row three-col">
-          <el-form-item :label="$t('account_spec')" class="form-col">
+          <el-form-item prop="spec" :label="$t('account_spec')" class="form-col">
             <el-select v-model="form.spec" style="width: 100%" @change="onSpecChange">
               <el-option value="year" label="Year" />
               <el-option value="month" label="Month" />
               <el-option value="day" label="Day" />
             </el-select>
           </el-form-item>
-          <el-form-item :label="$t('stack_qty')" class="form-col">
+          <el-form-item prop="stack" :label="$t('stack_qty')" class="form-col">
             <el-select v-model="form.stack" style="width: 100%">
               <el-option v-for="opt in stackOptions" :key="opt" :label="opt" :value="opt" />
             </el-select>
           </el-form-item>
-          <el-form-item :label="$t('quantity')" class="form-col">
+          <el-form-item prop="qty" :label="$t('quantity')" class="form-col">
             <el-input-number v-model="form.qty" :min="1" :max="99" style="width: 100%" />
           </el-form-item>
         </div>
-        <el-form-item :label="$t('device_type')">
-          <el-input v-model="form.device" placeholder="e.g. GNSS-Receiver-Model-X" />
-        </el-form-item>
-        <el-form-item v-if="form.accountList" :label="$t('account_list')">
-          <el-input v-model="form.accountList" type="textarea" :rows="3" readonly />
+        <div class="form-row">
+          <el-form-item prop="device" :label="$t('device_type')" class="form-col">
+            <el-input v-model="form.device" :placeholder="$t('placeholder_device')" />
+          </el-form-item>
+          <el-form-item prop="partner" :label="$t('partner_name')" class="form-col">
+            <el-select v-model="form.partner" style="width: 100%">
+              <el-option v-for="item in partnerOptions" :key="item.code" :label="item.name" :value="item.code" />
+            </el-select>
+          </el-form-item>
+        </div>
+        <el-form-item prop="accountList" :label="$t('account_list')">
+          <el-input v-model="form.accountList" type="textarea" :rows="3" :readonly="!!form.id" />
         </el-form-item>
         <el-form-item :label="$t('notes')">
-          <el-input v-model="form.notes" />
+          <el-input v-model="form.notes" :placeholder="$t('placeholder_notes')" />
         </el-form-item>
       </el-form>
       <span slot="footer">
         <el-button type="primary" size="small" @click="handleSave">{{ $t('confirm') }}</el-button>
-        <el-button size="small" @click="modalVisible = false">{{ $t('cancel') }}</el-button>
+        <el-button size="small" class="btn-reset" @click="modalVisible = false">{{ $t('cancel') }}</el-button>
       </span>
     </el-dialog>
   </div>
@@ -127,26 +243,52 @@ export default {
   data() {
     return {
       DB,
-      filters: { enterprise: '', svcType: '', status: '' },
+      filters: { title: '', orderNo: '', enterprise: '', partner: '', svcType: '', acctMode: '', spec: '', status: '' },
       modalVisible: false,
+      detailVisible: false,
+      detailRow: {},
       form: this.emptyForm(),
+      rules: {
+        enterprise: [{ required: true, message: this.$t('required'), trigger: 'change' }],
+        title: [{ required: true, message: this.$t('required'), trigger: 'blur' }],
+        svcType: [{ required: true, message: this.$t('required'), trigger: 'change' }],
+        acctMode: [{ required: true, message: this.$t('required'), trigger: 'change' }],
+        spec: [{ required: true, message: this.$t('required'), trigger: 'change' }],
+        stack: [{ required: true, message: this.$t('required'), trigger: 'change' }],
+        qty: [{ required: true, message: this.$t('required'), trigger: 'blur' }],
+        device: [{ required: true, message: this.$t('required'), trigger: 'blur' }],
+        partner: [{ required: true, message: this.$t('required'), trigger: 'change' }],
+        accountList: [{ required: true, message: this.$t('required'), trigger: 'blur' }]
+      },
       modeOptions: ['Ntrip', 'SDK'],
       stackOptions: [1, 3, 5]
     }
   },
   computed: {
+    partnerOptions() {
+      const map = new Map()
+      DB.partners.forEach(p => {
+        if (!map.has(p.code)) map.set(p.code, p)
+      })
+      return Array.from(map.values())
+    },
     filteredOrders() {
       return DB.orders.filter(o => {
+        const matchTitle = !this.filters.title || o.title.toLowerCase().includes(this.filters.title.toLowerCase())
+        const matchOrderNo = !this.filters.orderNo || o.orderNo.toLowerCase().includes(this.filters.orderNo.toLowerCase())
         const matchEnt = !this.filters.enterprise || o.enterprise.toLowerCase().includes(this.filters.enterprise.toLowerCase())
+        const matchPartner = !this.filters.partner || o.partner === this.filters.partner
         const matchType = !this.filters.svcType || o.svcType === this.filters.svcType
+        const matchMode = !this.filters.acctMode || o.acctMode === this.filters.acctMode
+        const matchSpec = !this.filters.spec || o.spec === this.filters.spec
         const matchStatus = !this.filters.status || o.status === this.filters.status
-        return matchEnt && matchType && matchStatus
+        return matchTitle && matchOrderNo && matchEnt && matchPartner && matchType && matchMode && matchSpec && matchStatus
       })
     }
   },
   methods: {
     emptyForm() {
-      return { id: null, enterprise: '', title: '', svcType: 'NRTK', acctMode: 'Ntrip', spec: 'year', stack: 1, qty: 1, device: '', accountList: '', notes: '' }
+      return { id: null, enterprise: '', title: '', svcType: 'NRTK', acctMode: 'Ntrip', spec: 'year', stack: 1, qty: 1, device: '', partner: '', accountList: '', notes: '' }
     },
     openOrderModal(row) {
       this.form = row ? { ...row } : this.emptyForm()
@@ -170,35 +312,27 @@ export default {
       }
     },
     handleSave() {
-      const result = saveOrder(this.form)
-      if (!result.success) {
-        this.$message.warning(result.message)
-        return
-      }
-      this.modalVisible = false
+      this.$refs.orderForm.validate(valid => {
+        if (!valid) return
+        const result = saveOrder(this.form)
+        if (!result.success) {
+          this.$message.warning(result.message)
+          return
+        }
+        this.modalVisible = false
+      })
     },
     handlePushOrder(id) {
       pushOrder(id)
-      this.$message.success('Order pushed successfully')
+      this.$message.success(this.$t('order_pushed'))
     },
     viewOrderDetail(row) {
-      this.$alert([
-        'Order #: ' + row.orderNo,
-        'Title: ' + row.title,
-        'Enterprise: ' + row.enterprise,
-        'Service: ' + row.svcType + ' | Mode: ' + row.acctMode,
-        'Spec: ' + row.spec + ' / Stack: ' + row.stack + ' / Qty: ' + row.qty,
-        'Device: ' + row.device,
-        'Accounts: ' + row.accountList,
-        'Status: ' + row.status,
-        'Notes: ' + (row.notes || '-'),
-        'Partner: ' + row.partner,
-        'Created: ' + row.created
-      ].join('\n'), 'Order Detail', { confirmButtonText: 'OK' })
+      this.detailRow = row
+      this.detailVisible = true
     },
     applyFilter() { /* reactive */ },
     resetFilter() {
-      this.filters = { enterprise: '', svcType: '', status: '' }
+      this.filters = { title: '', orderNo: '', enterprise: '', partner: '', svcType: '', acctMode: '', spec: '', status: '' }
     }
   }
 }
@@ -275,6 +409,77 @@ export default {
   &:hover {
     background: rgba(59, 130, 246, 0.3) !important;
     color: #93c5fd !important;
+  }
+}
+
+.detail-body {
+  padding: 8px 4px;
+}
+
+.detail-header {
+  margin-bottom: 20px;
+
+  .detail-no {
+    font-size: 12px;
+    color: $blue-500;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .detail-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+  }
+}
+
+.detail-divider {
+  height: 1px;
+  background: $border-color;
+  margin: 16px 0;
+}
+
+.detail-section {
+  .detail-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+
+    &.three {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    &.full {
+      grid-column: 1 / -1;
+    }
+
+    .detail-label {
+      font-size: 12px;
+      color: $text-gray-500;
+    }
+
+    .detail-value {
+      font-size: 14px;
+      color: #fff;
+      font-weight: 500;
+      word-break: break-all;
+
+      &.text-muted {
+        color: $text-gray-400;
+        font-weight: 400;
+      }
+    }
   }
 }
 

@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { Message } from 'element-ui'
 import router from '@/router'
+import i18n from '@/i18n'
 
 // 获取 store 的辅助函数，避免循环引用
 function getStore() {
@@ -46,7 +47,7 @@ function removePending(config) {
   const key = getPendingKey(config)
   if (pendingMap.has(key)) {
     const cancel = pendingMap.get(key)
-    cancel('重复请求，已取消')
+    cancel(i18n.t('req_duplicate_cancel'))
     pendingMap.delete(key)
   }
 }
@@ -56,7 +57,7 @@ function removePending(config) {
  */
 export function clearPending() {
   for (const [key, cancel] of pendingMap) {
-    cancel('请求已中断')
+    cancel(i18n.t('req_interrupted'))
     pendingMap.delete(key)
   }
 }
@@ -102,7 +103,7 @@ service.interceptors.response.use(
     // 根据业务状态码判断
     // 假设后端约定 code === 200 为成功
     if (res.code !== undefined && res.code !== 200) {
-      Message.error(res.message || '请求失败')
+      Message.error(res.message || i18n.t('req_failed'))
 
       // 登录过期
       if (res.code === 401) {
@@ -111,7 +112,7 @@ service.interceptors.response.use(
         router.push('/login')
       }
 
-      return Promise.reject(new Error(res.message || '请求失败'))
+      return Promise.reject(new Error(res.message || i18n.t('req_failed')))
     }
 
     return res
@@ -126,39 +127,39 @@ service.interceptors.response.use(
       return Promise.reject(error)
     }
 
-    let message = error.message || '请求失败'
+    let message = error.message || i18n.t('req_failed')
 
     if (error.response) {
       const { status } = error.response
       switch (status) {
         case 400:
-          message = '请求参数错误'
+          message = i18n.t('req_param_error')
           break
         case 401:
-          message = '登录已过期，请重新登录'
+          message = i18n.t('req_login_expired')
           getStore().dispatch('logout')
           router.push('/login')
           break
         case 403:
-          message = '没有权限访问该资源'
+          message = i18n.t('req_no_permission')
           break
         case 404:
-          message = '请求的资源不存在'
+          message = i18n.t('req_not_found')
           break
         case 500:
-          message = '服务器内部错误'
+          message = i18n.t('req_server_error')
           break
         case 502:
-          message = '网关错误'
+          message = i18n.t('req_gateway_error')
           break
         case 503:
-          message = '服务不可用'
+          message = i18n.t('req_service_unavailable')
           break
         default:
-          message = `请求失败: ${status}`
+          message = i18n.t('req_failed_status', { status })
       }
     } else if (error.request) {
-      message = '网络异常，请检查网络连接'
+      message = i18n.t('req_network_error')
     }
 
     Message.error(message)

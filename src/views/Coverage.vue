@@ -24,9 +24,9 @@
             <!-- Format Toggle (for coordinates) -->
             <div v-if="searchMode === 'coord'" class="format-toggle">
               <el-button :class="['format-btn', { active: coordFormat === 'deg' }]" size="mini"
-                @click="coordFormat = 'deg'">Degrees</el-button>
+                @click="coordFormat = 'deg'">{{ $t('degrees') }}</el-button>
               <el-button :class="['format-btn', { active: coordFormat === 'dms' }]" size="mini"
-                @click="coordFormat = 'dms'">D/M/S</el-button>
+                @click="coordFormat = 'dms'">{{ $t('dms') }}</el-button>
             </div>
 
             <!-- Coordinate Inputs -->

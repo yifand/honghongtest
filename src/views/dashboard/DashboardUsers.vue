@@ -8,6 +8,9 @@
       <div class="filter-row">
         <el-input v-model="filters.name" :placeholder="$t('enterprise_name')" size="small" class="filter-input" />
         <el-input v-model="filters.code" :placeholder="$t('user_code')" size="small" class="filter-input" />
+        <el-select v-model="filters.partner" :placeholder="$t('partner_name')" size="small" class="filter-input" clearable>
+          <el-option v-for="item in partnerOptions" :key="item.code" :label="item.name" :value="item.code" />
+        </el-select>
         <el-button size="small" class="btn-search" @click="applyFilter">{{ $t('search') }}</el-button>
         <el-button size="small" class="btn-reset" @click="resetFilter">{{ $t('reset') }}</el-button>
       </div>
@@ -21,10 +24,13 @@
             <span class="text-blue">{{ scope.row.account }}</span>
           </template>
         </el-table-column>
+        <el-table-column prop="password" :label="$t('login_password')" />
         <el-table-column prop="code" :label="$t('user_code')" />
         <el-table-column prop="instance" :label="$t('service_instance')" />
-        <el-table-column prop="poolName" :label="$t('resource_pool')" />
+        <el-table-column prop="poolNo" :label="$t('resource_pool_no')" />
+        <el-table-column prop="poolName" :label="$t('resource_pool_name')" />
         <el-table-column prop="created" :label="$t('created_time')" />
+        <el-table-column prop="updated" :label="$t('updated_time')" />
         <el-table-column :label="$t('actions')" width="140">
           <template slot-scope="scope">
             <el-button type="text" size="mini" @click="openUserModal(scope.row)">{{ $t('edit') }}</el-button>
@@ -36,46 +42,44 @@
 
     <!-- User Modal -->
     <el-dialog :title="form.id ? $t('edit_user') : $t('add_user')" :visible.sync="modalVisible" width="560px" custom-class="dark-dialog">
-      <el-form :model="form" label-position="top" size="small">
-        <el-form-item :label="$t('enterprise_name')">
-          <el-input v-model="form.enterprise" />
+      <el-form ref="form" :model="form" :rules="rules" label-position="top" size="small">
+        <el-form-item :label="$t('enterprise_name')" prop="enterprise">
+          <el-input v-model="form.enterprise" :placeholder="$t('placeholder_enterprise')" />
         </el-form-item>
         <div class="form-row">
-          <el-form-item :label="$t('login_account')" class="form-col">
-            <el-input v-model="form.account" />
+          <el-form-item :label="$t('login_account')" prop="account" class="form-col">
+            <el-input v-model="form.account" :placeholder="$t('placeholder_account')" />
           </el-form-item>
-          <el-form-item :label="$t('login_password')" class="form-col">
-            <el-input v-model="form.password" />
+          <el-form-item :label="$t('login_password')" prop="password" class="form-col">
+            <el-input v-model="form.password" :placeholder="$t('placeholder_password')" />
           </el-form-item>
         </div>
         <div class="form-row">
           <el-form-item :label="$t('user_code')" class="form-col">
-            <el-input v-model="form.code" placeholder="e.g. ZNJS001" />
-          </el-form-item>
-          <el-form-item :label="$t('phone')" class="form-col">
-            <el-input v-model="form.phone" />
-          </el-form-item>
-        </div>
-        <div class="form-row">
-          <el-form-item :label="$t('email')" class="form-col">
-            <el-input v-model="form.email" />
+            <el-input v-model="form.code" :placeholder="$t('placeholder_code')" />
           </el-form-item>
           <el-form-item :label="$t('service_instance')" class="form-col">
-            <el-input v-model="form.instance" />
+            <el-input v-model="form.instance" :placeholder="$t('placeholder_instance')" />
           </el-form-item>
         </div>
         <div class="form-row">
           <el-form-item :label="$t('resource_pool_name')" class="form-col">
-            <el-input v-model="form.poolName" />
+            <el-input v-model="form.poolName" :placeholder="$t('placeholder_pool_name')" />
           </el-form-item>
           <el-form-item :label="$t('resource_pool_no')" class="form-col">
-            <el-input v-model="form.poolNo" />
+            <el-input v-model="form.poolNo" :placeholder="$t('placeholder_pool_no')" />
           </el-form-item>
         </div>
+        <!-- <div class="form-row">
+          <el-form-item :label="$t('updated_time')" class="form-col">
+            <el-input v-model="form.updated" disabled />
+          </el-form-item>
+          <el-form-item class="form-col" />
+        </div> -->
       </el-form>
       <span slot="footer">
         <el-button type="primary" size="small" @click="handleSave">{{ $t('confirm') }}</el-button>
-        <el-button size="small" @click="modalVisible = false">{{ $t('cancel') }}</el-button>
+        <el-button size="small" class="btn-reset" @click="modalVisible = false">{{ $t('cancel') }}</el-button>
       </span>
     </el-dialog>
   </div>
@@ -89,44 +93,60 @@ export default {
   data() {
     return {
       DB,
-      filters: { name: '', code: '' },
+      filters: { name: '', code: '', partner: '' },
       modalVisible: false,
-      form: this.emptyForm()
+      form: this.emptyForm(),
+      rules: {
+        enterprise: [{ required: true, message: '请输入企业名称', trigger: 'blur' }],
+        account: [{ required: true, message: '请输入登录账号', trigger: 'blur' }],
+        password: [{ required: true, message: '请输入登录密码', trigger: 'blur' }]
+      }
     }
   },
   computed: {
+    partnerOptions() {
+      const map = new Map()
+      DB.partners.forEach(p => {
+        if (!map.has(p.code)) map.set(p.code, p)
+      })
+      return Array.from(map.values())
+    },
     filteredUsers() {
       return DB.users.filter(u => {
         const matchName = !this.filters.name || u.enterprise.toLowerCase().includes(this.filters.name.toLowerCase())
         const matchCode = !this.filters.code || u.code.toLowerCase().includes(this.filters.code.toLowerCase())
-        return matchName && matchCode
+        const matchPartner = !this.filters.partner || u.code === this.filters.partner
+        return matchName && matchCode && matchPartner
       })
     }
   },
   methods: {
     emptyForm() {
-      return { id: null, enterprise: '', account: '', password: '', code: '', phone: '', email: '', instance: '', poolName: '', poolNo: '' }
+      return { id: null, enterprise: '', account: '', password: '', code: '', phone: '', email: '', instance: '', poolName: '', poolNo: '', updated: '' }
     },
     openUserModal(row) {
       this.form = row ? { ...row } : this.emptyForm()
       this.modalVisible = true
     },
     handleSave() {
-      const result = saveUser(this.form)
-      if (!result.success) {
-        this.$message.warning(result.message)
-        return
-      }
-      this.modalVisible = false
+      this.$refs.form.validate(valid => {
+        if (!valid) return
+        const result = saveUser(this.form)
+        if (!result.success) {
+          this.$message.warning(result.message)
+          return
+        }
+        this.modalVisible = false
+      })
     },
     handleDeleteUser(id) {
-      this.$confirm(this.$t('confirm_delete') + ' ID: ' + id, '', { type: 'warning' }).then(() => {
+      this.$confirm(this.$t('confirm_delete') + ' — ID: ' + id, '', { type: 'warning' }).then(() => {
         deleteUser(id)
       }).catch(() => {})
     },
     applyFilter() { /* reactive */ },
     resetFilter() {
-      this.filters = { name: '', code: '' }
+      this.filters = { name: '', code: '', partner: '' }
     }
   }
 }

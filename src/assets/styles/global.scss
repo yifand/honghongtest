@@ -360,6 +360,23 @@ a {
   color: #fff !important;
 }
 
+.el-input-number__decrease,
+.el-input-number__increase {
+  background: #1e293b !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #fff !important;
+
+  &:hover {
+    background: #334155 !important;
+    color: #fff !important;
+  }
+
+  &.is-disabled {
+    background: rgba(30, 41, 59, 0.4) !important;
+    color: rgba(255, 255, 255, 0.25) !important;
+  }
+}
+
 .el-textarea__inner {
   background: rgba(255, 255, 255, 0.05) !important;
   border-color: rgba(255, 255, 255, 0.1) !important;

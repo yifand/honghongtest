@@ -14,7 +14,9 @@ export default {
       map: null,
       nrtkLayer: null,
       pppRTKLayer: null,
-      searchMarker: null
+      searchMarker: null,
+      osm: null,
+      amap: null
     }
   },
   mounted() {
@@ -30,46 +32,37 @@ export default {
     initMap() {
       if (this.map) return
 
-      // this.map = L.map(this.$refs.mapContainer, {
-
-      // }).setView([30, 100], 3)
-
-
       this.map = L.map(this.$refs.mapContainer, {
         center: [30, 110],
         zoom: 2,          // 初始看到整个世界
         minZoom: 1,       // 允许缩到最小（整个世界）
         maxZoom: 18,
-        // noWrap: true,     // 禁止世界左右重复
-        // maxBounds: L.latLngBounds(L.latLng(-85, -180), L.latLng(85, 180)),
-        // maxBoundsViscosity: 1.0
+        noWrap: true,     // 禁止世界左右重复/
+        maxBounds: L.latLngBounds(L.latLng(-85, -180), L.latLng(85, 180)),
+        maxBoundsViscosity: 1.0
       });
 
       // 2. 备用底图（zoom 0–2 用，能显示完整世界）
-      const baseWorld = L.tileLayer('https://t0.tianditu.gov.cn/vec_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=vec&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=52d70a60159979d4fe3bbf996a005a1a', {
+      this.osm = L.tileLayer('https://t0.tianditu.gov.cn/vec_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=vec&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=52d70a60159979d4fe3bbf996a005a1a', {
         subdomains: ['0', '1', '2', '3', '4', '5', '6', '7'],
         attribution: '© 天地图',
-        minZoom: 1,
-        maxZoom: 2,
+        maxZoom: 18,
       }).addTo(this.map);
-
+      // OSM（WGS84，全球详细）
+      // this.osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      //   maxZoom: 19,
+      //   attribution: '© OpenStreetMap contributors'
+      // }).addTo(this.map);
       // 3. 高德底图（zoom≥3 用，国内细节好）
-      const amap = L.tileLayer('https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', {
+      this.amap = L.tileLayer('https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', {
         subdomains: ['1', '2', '3', '4'],
         minZoom: 3,
         maxZoom: 18,
         attribution: '© 高德地图'
       }).addTo(this.map);
+      this.map.on('moveend zoomend', this.updateBaseLayer);
+      this.updateBaseLayer()
 
-      // L.tileLayer('https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', {
-      //   subdomains: ['1', '2', '3', '4'],
-      //   minZoom: 3,
-      //   maxZoom: 22,
-      //   noWrap: true,
-      //   attribution: '© 高德地图',
-      //   maxBoundsViscosity: 1.0 // 拖到边界回弹
-
-      // }).addTo(this.map)
       // L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', {
       //   subdomains: ['a', 'b', 'c', 'd'],
       //   attribution: '© CARTO | © OpenStreetMap contributors'
@@ -163,7 +156,30 @@ export default {
         checked ? this.map.addLayer(this.pppRTKLayer) : this.map.removeLayer(this.pppRTKLayer)
       }
     },
+    isInChina(lng, lat) {
+      // 中国大致范围：经度73.66~135.05，纬度3.86~53.55
+      return lng >= 73.66 && lng <= 135.05 && lat >= 3.86 && lat <= 53.55;
+    },
+    updateBaseLayer() {
+      const center = this.map.getCenter();
+      const zoom = this.map.getZoom();
+      const inChina = this.isInChina(center.lng, center.lat);
 
+      // 规则：
+      // 1. 缩放 ≤ 2：强制显示 OSM（全球视图）
+      // 2. 国内 + zoom > 2：显示高德
+      // 3. 国外 + zoom > 2：显示 OSM
+      if (zoom <= 2) {
+        if (this.map.hasLayer(this.amap)) this.map.removeLayer(this.amap);
+        if (!this.map.hasLayer(this.osm)) this.map.addLayer(this.osm);
+      } else if (inChina) {
+        if (this.map.hasLayer(this.osm)) this.map.removeLayer(this.osm);
+        if (!this.map.hasLayer(this.amap)) this.map.addLayer(this.amap);
+      } else {
+        if (this.map.hasLayer(this.amap)) this.map.removeLayer(this.amap);
+        if (!this.map.hasLayer(this.osm)) this.map.addLayer(this.osm);
+      }
+    },
     setView(lat, lng, zoom = 8) {
       if (this.map) {
         this.map.setView([lat, lng], zoom)

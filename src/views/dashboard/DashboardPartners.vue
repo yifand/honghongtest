@@ -24,32 +24,29 @@
         <el-table-column prop="notes" :label="$t('notes')" />
         <el-table-column :label="$t('actions')" width="140">
           <template slot-scope="scope">
-            <el-button type="text" size="mini" @click="openPartnerModal(scope.row)">Detail</el-button>
-            <el-button type="text" size="mini" class="text-red" @click="handleDelete(scope.row.id)">{{ $t('delete') }}</el-button>
+            <el-button type="text" size="mini" @click="openPartnerModal(scope.row, true)">{{ $t('detail') }}</el-button>
+            <el-button type="text" size="mini" class="text-green" @click="openPartnerModal(scope.row, false)">{{ $t('edit') }}</el-button>
           </template>
         </el-table-column>
       </el-table>
     </el-card>
 
     <!-- Partner Modal -->
-    <el-dialog :title="form.id ? $t('edit_partner') : $t('add_partner')" :visible.sync="modalVisible" width="480px" custom-class="dark-dialog">
-      <el-form :model="form" label-position="top" size="small">
-        <el-form-item :label="$t('partner_name')">
-          <el-input v-model="form.name" />
-        </el-form-item>
-        <el-form-item :label="$t('enterprise_name')">
-          <el-input v-model="form.enterprise" />
+    <el-dialog :title="dialogTitle" :visible.sync="modalVisible" width="480px" custom-class="dark-dialog" @closed="resetForm">
+      <el-form ref="partnerForm" :model="form" :rules="formRules" label-position="top" size="small">
+        <el-form-item :label="$t('partner_name')" prop="name">
+          <el-input v-model="form.name" :placeholder="$t('placeholder_partner_name')" :disabled="modalReadonly" />
         </el-form-item>
         <el-form-item :label="$t('partner_code')">
-          <el-input v-model="form.code" placeholder="e.g. ZNJS" />
+          <el-input v-model="form.code" :placeholder="$t('placeholder_prefix')" :disabled="modalReadonly" />
         </el-form-item>
         <el-form-item :label="$t('notes')">
-          <el-input v-model="form.notes" />
+          <el-input v-model="form.notes" :placeholder="$t('placeholder_notes')" :disabled="modalReadonly" />
         </el-form-item>
       </el-form>
       <span slot="footer">
-        <el-button type="primary" size="small" @click="handleSave">{{ $t('confirm') }}</el-button>
-        <el-button size="small" @click="modalVisible = false">{{ $t('cancel') }}</el-button>
+        <el-button v-if="!modalReadonly" type="primary" size="small" @click="handleSave">{{ $t('confirm') }}</el-button>
+        <el-button size="small" class="btn-reset" @click="modalVisible = false">{{ modalReadonly ? $t('ok') : $t('cancel') }}</el-button>
       </span>
     </el-dialog>
   </div>
@@ -65,10 +62,20 @@ export default {
       DB,
       filters: { name: '' },
       modalVisible: false,
-      form: this.emptyForm()
+      modalReadonly: false,
+      form: this.emptyForm(),
+      formRules: {
+        name: [
+          { required: true, message: this.$t('required'), trigger: 'blur' }
+        ]
+      }
     }
   },
   computed: {
+    dialogTitle() {
+      if (this.modalReadonly) return this.$t('partner_detail_title')
+      return this.form.id ? this.$t('edit_partner') : this.$t('add_partner')
+    },
     filteredPartners() {
       return DB.partners.filter(p => {
         return !this.filters.name || p.name.toLowerCase().includes(this.filters.name.toLowerCase())
@@ -77,19 +84,29 @@ export default {
   },
   methods: {
     emptyForm() {
-      return { id: null, name: '', enterprise: '', code: '', notes: '' }
+      return { id: null, name: '', code: '', notes: '' }
     },
-    openPartnerModal(row) {
+    openPartnerModal(row, readonly = false) {
+      this.modalReadonly = readonly
       this.form = row ? { ...row } : this.emptyForm()
       this.modalVisible = true
+      this.$nextTick(() => {
+        this.$refs.partnerForm && this.$refs.partnerForm.clearValidate()
+      })
     },
     handleSave() {
-      const result = savePartner(this.form)
-      if (!result.success) {
-        this.$message.warning(result.message)
-        return
-      }
-      this.modalVisible = false
+      this.$refs.partnerForm.validate(valid => {
+        if (!valid) return
+        const result = savePartner(this.form)
+        if (!result.success) {
+          this.$message.warning(result.message)
+          return
+        }
+        this.modalVisible = false
+      })
+    },
+    resetForm() {
+      this.$refs.partnerForm && this.$refs.partnerForm.clearValidate()
     },
     handleDelete(id) {
       this.$confirm(this.$t('confirm_delete') + ' ID: ' + id, '', { type: 'warning' }).then(() => {
@@ -139,6 +156,10 @@ export default {
 
 .text-red {
   color: #ef4444;
+}
+
+.text-green {
+  color: #22c55e;
 }
 
 .text-xs {
