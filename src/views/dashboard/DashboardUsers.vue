@@ -6,70 +6,85 @@
     </div>
     <el-card class="glass filter-card">
       <div class="filter-row">
-        <el-input v-model="filters.name" :placeholder="$t('enterprise_name')" size="small" class="filter-input" />
-        <el-input v-model="filters.code" :placeholder="$t('user_code')" size="small" class="filter-input" />
-        <el-select v-model="filters.partner" :placeholder="$t('partner_name')" size="small" class="filter-input" clearable>
-          <el-option v-for="item in partnerOptions" :key="item.code" :label="item.name" :value="item.code" />
+        <!-- <el-input v-model="filters.companyName" :placeholder="$t('enterprise_name')" size="small" class="filter-input" /> -->
+        <el-input v-model="filters.userCode" :placeholder="$t('login_account')" size="small" class="filter-input" />
+        <el-select v-model="filters.companyCode" :placeholder="$t('enterprise_name')" size="small" class="filter-input"
+          clearable>
+          <el-option v-for="item in partnerOptions" :key="item.companyCode" :label="item.companyName"
+            :value="item.companyCode" />
         </el-select>
         <el-button size="small" class="btn-search" @click="applyFilter">{{ $t('search') }}</el-button>
         <el-button size="small" class="btn-reset" @click="resetFilter">{{ $t('reset') }}</el-button>
       </div>
     </el-card>
     <el-card class="glass">
-      <el-table :data="filteredUsers" size="small" class="dark-table">
-        <el-table-column prop="id" label="ID" width="60" />
-        <el-table-column prop="enterprise" :label="$t('enterprise_name')" />
-        <el-table-column prop="account" :label="$t('login_account')">
+      <el-table :data="dataList" size="small" class="dark-table">
+        <el-table-column type="index" width="50">
+        </el-table-column>
+        <el-table-column prop="enterpriseName" :label="$t('enterprise_name')" />
+        <el-table-column prop="userCode" :label="$t('login_account')">
           <template slot-scope="scope">
-            <span class="text-blue">{{ scope.row.account }}</span>
+            <span class="text-blue">{{ scope.row.userCode }}</span>
           </template>
         </el-table-column>
         <el-table-column prop="password" :label="$t('login_password')" />
-        <el-table-column prop="code" :label="$t('user_code')" />
-        <el-table-column prop="instance" :label="$t('service_instance')" />
-        <el-table-column prop="poolNo" :label="$t('resource_pool_no')" />
-        <el-table-column prop="poolName" :label="$t('resource_pool_name')" />
-        <el-table-column prop="created" :label="$t('created_time')" />
-        <el-table-column prop="updated" :label="$t('updated_time')" />
+        <!-- <el-table-column prop="userCode" :label="$t('user_code')" /> -->
+        <el-table-column prop="serviceInstance" :label="$t('service_instance')" />
+        <!-- <el-table-column prop="poolNo" :label="$t('resource_pool_no')" /> -->
+        <el-table-column prop="resourcePool" :label="$t('resource_pool_name')" />
+        <el-table-column prop="createTime" :label="$t('created_time')" min-width="100" />
+        <el-table-column prop="updateTime" :label="$t('updated_time')" min-width="100" />
         <el-table-column :label="$t('actions')" width="140">
           <template slot-scope="scope">
             <el-button type="text" size="mini" @click="openUserModal(scope.row)">{{ $t('edit') }}</el-button>
-            <el-button type="text" size="mini" class="text-red" @click="handleDeleteUser(scope.row.id)">{{ $t('delete') }}</el-button>
+            <el-button type="text" size="mini" class="text-red" @click="handleDeleteUser(scope.row.userCode)">{{
+              $t('delete')
+              }}</el-button>
           </template>
         </el-table-column>
       </el-table>
+      <div class="pagination-bar">
+        <el-pagination :key="$i18n.locale" background layout="total, sizes, prev, pager, next, jumper"
+          :current-page.sync="currentPage" :page-sizes="[10, 20, 50, 100]" :page-size="pageSize" :total="total"
+          @size-change="handleSizeChange" @current-change="handleCurrentChange" />
+      </div>
     </el-card>
 
     <!-- User Modal -->
-    <el-dialog :title="form.id ? $t('edit_user') : $t('add_user')" :visible.sync="modalVisible" width="560px" custom-class="dark-dialog">
+    <el-dialog :title="form.id ? $t('edit_user') : $t('add_user')" :visible.sync="modalVisible" width="560px"
+      custom-class="dark-dialog">
       <el-form ref="form" :model="form" :rules="rules" label-position="top" size="small">
-        <el-form-item :label="$t('enterprise_name')" prop="enterprise">
-          <el-input v-model="form.enterprise" :placeholder="$t('placeholder_enterprise')" />
+        <el-form-item :label="$t('enterprise_name')" prop="companyCode">
+          <el-select v-model="form.companyCode" :placeholder="$t('partner_name')" size="small" class="filter-input"
+            clearable>
+            <el-option v-for="item in partnerOptions" :key="item.companyCode" :label="item.companyName"
+              :value="item.companyCode" />
+          </el-select>
         </el-form-item>
         <div class="form-row">
-          <el-form-item :label="$t('login_account')" prop="account" class="form-col">
-            <el-input v-model="form.account" :placeholder="$t('placeholder_account')" />
+          <el-form-item :label="$t('login_account')" prop="userCode" class="form-col">
+            <el-input v-model="form.userCode" :placeholder="$t('placeholder_account')" />
           </el-form-item>
           <el-form-item :label="$t('login_password')" prop="password" class="form-col">
             <el-input v-model="form.password" :placeholder="$t('placeholder_password')" />
           </el-form-item>
         </div>
-        <div class="form-row">
-          <el-form-item :label="$t('user_code')" class="form-col">
-            <el-input v-model="form.code" :placeholder="$t('placeholder_code')" />
+        <!-- <div class="form-row">
+          <el-form-item :label="$t('resource_pool_name')" class="form-col">
+            <el-input v-model="form.poolName" :placeholder="$t('placeholder_pool_name')" />
           </el-form-item>
           <el-form-item :label="$t('service_instance')" class="form-col">
             <el-input v-model="form.instance" :placeholder="$t('placeholder_instance')" />
           </el-form-item>
-        </div>
-        <div class="form-row">
-          <el-form-item :label="$t('resource_pool_name')" class="form-col">
-            <el-input v-model="form.poolName" :placeholder="$t('placeholder_pool_name')" />
-          </el-form-item>
-          <el-form-item :label="$t('resource_pool_no')" class="form-col">
+        </div> -->
+        <!-- <div class="form-row"> -->
+        <!-- <el-form-item :label="$t('user_code')" class="form-col">
+            <el-input v-model="form.code" :placeholder="$t('placeholder_code')" />
+          </el-form-item> -->
+        <!-- <el-form-item :label="$t('resource_pool_no')" class="form-col">
             <el-input v-model="form.poolNo" :placeholder="$t('placeholder_pool_no')" />
-          </el-form-item>
-        </div>
+          </el-form-item> -->
+        <!-- </div> -->
         <!-- <div class="form-row">
           <el-form-item :label="$t('updated_time')" class="form-col">
             <el-input v-model="form.updated" disabled />
@@ -86,67 +101,108 @@
 </template>
 
 <script>
-import { DB, saveUser, deleteUser } from '@/data/dashboardDB'
-
+// import { DB, saveUser, deleteUser } from '@/data/dashboardDB'
+import { userInfoCreate, getUserInfoSearch, userInfoRemove, userInfoEdit, getPartnerSearch } from '@/common/js/api.js'
+import { RES_SUCCESS } from '@/common/js/const.js'
 export default {
   name: 'DashboardUsers',
   data() {
     return {
-      DB,
-      filters: { name: '', code: '', partner: '' },
+      // DB,
+      filters: { companyCode: '', userCode: '' },
+      currentPage: 1,
+      pageSize: 10,
       modalVisible: false,
       form: this.emptyForm(),
+      dataList: [],
+      total: 0,
+      partnerOptions: [],
       rules: {
-        enterprise: [{ required: true, message: '请输入企业名称', trigger: 'blur' }],
-        account: [{ required: true, message: '请输入登录账号', trigger: 'blur' }],
+        companyCode: [{ required: true, message: '请选择企业名称', trigger: 'change' }],
+        userCode: [{ required: true, message: '请输入登录账号', trigger: 'blur' }],
         password: [{ required: true, message: '请输入登录密码', trigger: 'blur' }]
       }
     }
   },
   computed: {
-    partnerOptions() {
-      const map = new Map()
-      DB.partners.forEach(p => {
-        if (!map.has(p.code)) map.set(p.code, p)
-      })
-      return Array.from(map.values())
-    },
-    filteredUsers() {
-      return DB.users.filter(u => {
-        const matchName = !this.filters.name || u.enterprise.toLowerCase().includes(this.filters.name.toLowerCase())
-        const matchCode = !this.filters.code || u.code.toLowerCase().includes(this.filters.code.toLowerCase())
-        const matchPartner = !this.filters.partner || u.code === this.filters.partner
-        return matchName && matchCode && matchPartner
-      })
-    }
+
+  },
+  mounted() {
+    this.getList()
+    this.getPartnerList()
   },
   methods: {
     emptyForm() {
       return { id: null, enterprise: '', account: '', password: '', code: '', phone: '', email: '', instance: '', poolName: '', poolNo: '', updated: '' }
     },
     openUserModal(row) {
-      this.form = row ? { ...row } : this.emptyForm()
+      this.form = row ? { ...row, id: row.userCode } : this.emptyForm()
       this.modalVisible = true
     },
+    getList() {
+      const params = { ...this.filters, pageNum: this.pageNum, pageSize: this.pageSize }
+      getUserInfoSearch(params).then(res => {
+        if (res.code === RES_SUCCESS || res.code === 200) {
+          this.dataList = res.result.records
+          this.total = res.result.total
+        } else {
+          this.$message.warning(res.message)
+        }
+      }
+      )
+    },
+    getPartnerList() {
+      getPartnerSearch({ pageNum: 1, pageSize: 9999 }).then(res => {
+        if (res.code === RES_SUCCESS || res.code === 200) {
+          this.partnerOptions = res.result.records
+        } else {
+          this.$message.warning(res.message)
+        }
+      }
+      )
+    },
     handleSave() {
-      this.$refs.form.validate(valid => {
+      this.$refs.form.validate(async valid => {
         if (!valid) return
-        const result = saveUser(this.form)
-        if (!result.success) {
-          this.$message.warning(result.message)
-          return
+        const res = this.form.id ? await userInfoEdit(this.form) : await userInfoCreate(this.form)
+        if (res.code === RES_SUCCESS || res.code === 200) {
+          this.getList()
+          this.modalVisible = false
+        } else {
+          this.$message.warning(res.message)
         }
         this.modalVisible = false
       })
     },
-    handleDeleteUser(id) {
-      this.$confirm(this.$t('confirm_delete') + ' — ID: ' + id, '', { type: 'warning' }).then(() => {
-        deleteUser(id)
-      }).catch(() => {})
+    handleDeleteUser(userCode) {
+      this.$confirm(this.$t('confirm_delete') + ' — userCode: ' + userCode, '', { type: 'warning' }).then(() => {
+        userInfoRemove({ userCode }).then(res => {
+          if (res.code === RES_SUCCESS || res.code === 200) {
+            this.$message.success("删除成功！")
+            this.getList()
+          } else {
+            this.$message.warning(res.message)
+          }
+        })
+      }).catch(() => { })
     },
-    applyFilter() { /* reactive */ },
+    handleSizeChange(size) {
+      this.pageSize = size
+      this.pageNum = 1
+      this.getList()
+    },
+    handleCurrentChange(page) {
+      this.pageNum = page
+      this.getList()
+    },
+    applyFilter() {
+      this.pageNum = 1
+      this.getList()
+    },
     resetFilter() {
       this.filters = { name: '', code: '', partner: '' }
+      this.pageNum = 1
+      this.getList()
     }
   }
 }
@@ -223,5 +279,11 @@ export default {
     background: rgba(255, 255, 255, 0.1) !important;
     color: #fff !important;
   }
+}
+
+.pagination-bar {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 16px;
 }
 </style>

@@ -44,8 +44,8 @@
       </div>
     </el-card>
     <el-card class="glass">
-      <el-table :data="filteredAccounts" size="small" class="dark-table">
-        <el-table-column prop="id" label="#" width="60" />
+      <el-table :data="paginatedAccounts" size="small" class="dark-table">
+        <el-table-column prop="id" label="#" min-width="60" />
         <el-table-column prop="name" :label="$t('account_name')">
           <template slot-scope="scope">
             <span class="text-blue">{{ scope.row.name }}</span>
@@ -86,6 +86,19 @@
           </template>
         </el-table-column>
       </el-table>
+      <div class="pagination-bar">
+        <el-pagination
+          :key="$i18n.locale"
+          background
+          layout="total, sizes, prev, pager, next, jumper"
+          :current-page.sync="currentPage"
+          :page-sizes="[10, 20, 50, 100]"
+          :page-size="pageSize"
+          :total="filteredAccounts.length"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+        />
+      </div>
     </el-card>
 
     <!-- Password Modal -->
@@ -115,6 +128,8 @@ export default {
     return {
       DB,
       filters: { name: '', enterprise: '', svcType: '', activated: '', mode: '', spec: '', device: '' },
+      currentPage: 1,
+      pageSize: 10,
       modalVisible: false,
       passwordForm: { id: null, name: '', newPassword: '' },
       visiblePasswordIds: {},
@@ -133,6 +148,10 @@ export default {
         const matchDevice = !this.filters.device || a.device === this.filters.device
         return matchName && matchEnt && matchType && matchStatus && matchMode && matchSpec && matchDevice
       })
+    },
+    paginatedAccounts() {
+      const start = (this.currentPage - 1) * this.pageSize
+      return this.filteredAccounts.slice(start, start + this.pageSize)
     }
   },
   methods: {
@@ -148,9 +167,19 @@ export default {
       this.modalVisible = false
     },
     exportAccountsCSV,
-    applyFilter() { /* reactive */ },
+    handleSizeChange(size) {
+      this.pageSize = size
+      this.currentPage = 1
+    },
+    handleCurrentChange(page) {
+      this.currentPage = page
+    },
+    applyFilter() {
+      this.currentPage = 1
+    },
     resetFilter() {
       this.filters = { name: '', enterprise: '', svcType: '', activated: '', mode: '', spec: '', device: '' }
+      this.currentPage = 1
     }
   }
 }
@@ -235,5 +264,11 @@ export default {
     background: rgba(255, 255, 255, 0.1) !important;
     color: #fff !important;
   }
+}
+
+.pagination-bar {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 16px;
 }
 </style>

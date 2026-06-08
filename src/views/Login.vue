@@ -37,6 +37,8 @@
 
 <script>
 import { login } from '@/common/js/api'
+import { AESEncryptPassword } from '@/common/js/crypto.js'
+import { RES_SUCCESS } from '@/common/js/const.js'
 export default {
   name: 'LoginPage',
   data() {
@@ -82,26 +84,24 @@ export default {
         if (!valid) return
 
         // 接入真实后端时，取消下面注释并传入实际参数
-        // const { authApi } = require('@/services')
-        // authApi.login({
-        //   username: this.form.username,
-        //   password: this.form.password
-        // }).then(res => {
-        //   const token = res.data.token
-        //   this.$store.dispatch('login', token)
-        //   const redirect = this.$route.query.redirect || '/dashboard/overview'
-        //   this.$router.push(redirect)
-        //   this.$message.success(this.$t('login_success'))
-        // }).catch(error => {
-        //   this.$message.error(error.message || this.$t('login_failed'))
-        // })
+        login({
+          username: this.form.username,
+          password: AESEncryptPassword(this.form.password)
+        }).then(res => {
+          console.log({ res });
 
-        // 模拟登录
-        const token = 'mock_token_' + Date.now()
-        this.$store.dispatch('login', token)
-        const redirect = this.$route.query.redirect || '/dashboard/overview'
-        this.$router.push(redirect)
-        this.$message.success(this.$t('login_success'))
+          if ((res.code === RES_SUCCESS || res.code === '200' || res.status === 200) &&
+            res.result === '1000_001') {
+            this.$store.commit('SET_USERNAME', this.form.username)
+            const redirect = this.$route.query.redirect || '/dashboard/overview'
+            this.$router.push(redirect)
+            this.$message.success(this.$t('login_success'))
+          } else {
+            this.$message.error(res.message || this.$t('login_failed'))
+          }
+        }).catch(error => {
+          // this.$message.error(error.message || this.$t('login_failed'))
+        })
       })
     }
   }

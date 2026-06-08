@@ -237,7 +237,7 @@ a {
 }
 
 #app .el-table.dark-table th.el-table__cell {
-  background-color: rgba(255, 255, 255, 0.03) !important;
+  background-color: #121c31 !important;
   color: #9ca3af !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
   font-weight: 500;
@@ -271,15 +271,15 @@ a {
 }
 
 #app .el-table.dark-table .el-table__fixed-header-wrapper th.el-table__cell {
-  background-color: rgba(255, 255, 255, 0.03) !important;
+  background-color: rgb(23 30 48) !important;
 }
 
 #app .el-table.dark-table .el-table__fixed-body-wrapper td.el-table__cell {
-  background-color: transparent !important;
+  background-color: #121c31 !important;
 }
 
 #app .el-table.dark-table .el-table__expanded-cell {
-  background-color: transparent !important;
+  background-color: #121c31 !important;
 }
 
 #app .el-table.dark-table::before,
@@ -288,10 +288,10 @@ a {
 }
 
 #app .el-table.dark-table colgroup col {
-  background-color: transparent !important;
+  background-color: #121c31 !important;
 }
 #app .el-table.dark-table tr {
-  background-color: transparent !important;
+  background-color: #121c31 !important;
 }
 
 .dark-dialog {
@@ -426,4 +426,53 @@ a {
 
 .el-menu {
   background: transparent !important;
+}
+
+/* Dark pagination overrides */
+.el-pagination {
+  color: $text-gray-400 !important;
+}
+
+.el-pagination__total,
+.el-pagination__jump {
+  color: $text-gray-400 !important;
+}
+
+.el-pagination__jump .el-input__inner {
+  color: #fff !important;
+}
+
+.el-pagination__sizes .el-input__inner {
+  color: #fff !important;
+}
+
+.el-pagination.is-background .btn-prev,
+.el-pagination.is-background .btn-next,
+.el-pagination.is-background .el-pager li {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: $text-gray-400 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.el-pagination.is-background .btn-prev:hover,
+.el-pagination.is-background .btn-next:hover,
+.el-pagination.is-background .el-pager li:hover {
+  background: rgba(59, 130, 246, 0.2) !important;
+  color: #fff !important;
+}
+
+.el-pagination.is-background .el-pager li.active {
+  background: linear-gradient(135deg, $blue-500, $cyan-500) !important;
+  color: #fff !important;
+  border-color: transparent !important;
+}
+
+.el-pagination.is-background .el-pager li.active:hover {
+  background: linear-gradient(135deg, darken($blue-500, 10%), darken($cyan-500, 10%)) !important;
+}
+
+.el-pagination.is-background .btn-prev:disabled,
+.el-pagination.is-background .btn-next:disabled {
+  background: rgba(255, 255, 255, 0.02) !important;
+  color: $text-gray-500 !important;
 }

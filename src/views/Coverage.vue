@@ -138,7 +138,7 @@ export default {
           this.$message.warning('Please enter a location keyword')
           return
         }
-        const result = this.$refs.coverageMap.searchByKeyword(keyword)
+        const result = this.$refs.coverageMap.searchPlace(keyword)
         if (!result) {
           this.$message.warning('Location not found')
         }

@@ -10,7 +10,10 @@ export default new Vuex.Store({
   state: {
     lang: savedLang,
     isLoggedIn: !!savedToken,
-    token: savedToken
+    token: savedToken,
+    role:0,
+    authoritys:'',
+    userName:''
   },
   mutations: {
     SET_LANG(state, lang) {
@@ -19,6 +22,15 @@ export default new Vuex.Store({
     },
     SET_LOGIN(state, status) {
       state.isLoggedIn = status
+    },
+    SET_ROLE(state, role) {
+      state.role = role
+    },
+    SET_USERNAME(state, userName) {
+      state.userName = userName
+    },
+    SET_AUTHORITYS(state, authoritys){
+      state.authoritys =authoritys
     },
     SET_TOKEN(state, token) {
       state.token = token
@@ -41,6 +53,10 @@ export default new Vuex.Store({
     logout({ commit }) {
       commit('SET_TOKEN', '')
       commit('SET_LOGIN', false)
+      commit('SET_ROLE', 0)
+      commit('SET_AUTHORITYS', '')
+      commit('SET_USERNAME', '')
+
     }
   }
 })

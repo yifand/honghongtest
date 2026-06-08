@@ -6,6 +6,7 @@
 
 <script>
 /* global L */
+import config from '../../config'
 
 export default {
   name: 'CoverageMap',
@@ -16,7 +17,9 @@ export default {
       pppRTKLayer: null,
       searchMarker: null,
       osm: null,
-      amap: null
+      amap: null,
+      currentMarker: null
+
     }
   },
   mounted() {
@@ -31,7 +34,12 @@ export default {
   methods: {
     initMap() {
       if (this.map) return
-
+      delete L.Icon.Default.prototype._getIconUrl;
+      L.Icon.Default.mergeOptions({
+        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png'
+      });
       this.map = L.map(this.$refs.mapContainer, {
         center: [30, 110],
         zoom: 2,          // 初始看到整个世界
@@ -43,7 +51,7 @@ export default {
       });
 
       // 2. 备用底图（zoom 0–2 用，能显示完整世界）
-      this.osm = L.tileLayer('https://t0.tianditu.gov.cn/vec_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=vec&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=52d70a60159979d4fe3bbf996a005a1a', {
+      this.osm = L.tileLayer(`https://t0.tianditu.gov.cn/vec_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=vec&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=${config.token}`, {
         subdomains: ['0', '1', '2', '3', '4', '5', '6', '7'],
         attribution: '© 天地图',
         maxZoom: 18,
@@ -54,14 +62,17 @@ export default {
       //   attribution: '© OpenStreetMap contributors'
       // }).addTo(this.map);
       // 3. 高德底图（zoom≥3 用，国内细节好）
-      this.amap = L.tileLayer('https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', {
-        subdomains: ['1', '2', '3', '4'],
-        minZoom: 3,
-        maxZoom: 18,
-        attribution: '© 高德地图'
+      // this.amap = L.tileLayer('https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', {
+      //   subdomains: ['1', '2', '3', '4'],
+      //   minZoom: 3,
+      //   maxZoom: 18,
+      //   attribution: '© 高德地图'
+      // }).addTo(this.map);
+      L.tileLayer(`https://t{s}.tianditu.gov.cn/cva_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=cva&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=${config.token}`, {
+        subdomains: ['0', '1', '2', '3', '4', '5', '6', '7']
       }).addTo(this.map);
-      this.map.on('moveend zoomend', this.updateBaseLayer);
-      this.updateBaseLayer()
+      // this.map.on('moveend zoomend', this.updateBaseLayer);
+      // this.updateBaseLayer()
 
       // L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', {
       //   subdomains: ['a', 'b', 'c', 'd'],
@@ -185,7 +196,57 @@ export default {
         this.map.setView([lat, lng], zoom)
       }
     },
+    async searchPlace(keyword) {
+      keyword = keyword.trim();
+      if (!keyword) return alert("请输入城市名");
 
+      // 判断是否包含中文 → 国内，用天地图
+      // const isChinese = /[\u4e00-\u9fa5]/.test(keyword);
+
+      try {
+        let lat, lon, displayName;
+
+        // if (isChinese) {
+        // --------------------
+        // 国内搜索：天地图
+        // --------------------
+        const url = `https://api.tianditu.gov.cn/geocoder?ds=${encodeURIComponent(JSON.stringify({ keyWord: keyword }))}&tk=${config.token}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.location) {
+          lon = data.location.lon;
+          lat = data.location.lat;
+          displayName = keyword;
+        }
+
+        // } else {
+        //   // --------------------
+        //   // 国外搜索：OpenStreetMap 全球（免费无密钥）
+        //   // --------------------
+        //   const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(keyword)}&limit=1`;
+        //   const res = await fetch(url);
+        //   const arr = await res.json();
+        //   if (!arr || arr.length === 0) throw new Error("未找到");
+        //   lat = arr[0].lat;
+        //   lon = arr[0].lon;
+        //   displayName = arr[0].display_name || keyword;
+        // }
+
+        // 移动地图
+        this.map.setView([lat, lon], 10);
+
+        // 添加标记
+        // if (this.currentMarker) this.map.removeLayer(this.currentMarker);
+        // this.currentMarker = L.marker([lat, lon])
+        //   .addTo(this.map)
+        //   .bindPopup(`${displayName}<br>经纬度：${lon}, ${lat}`)
+        //   .openPopup();
+
+      } catch (e) {
+        alert("搜索失败：未找到该地点");
+        console.error(e);
+      }
+    },
     invalidateSize() {
       if (this.map) {
         this.map.invalidateSize()
