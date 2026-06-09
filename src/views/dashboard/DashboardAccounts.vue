@@ -6,78 +6,71 @@
     </div>
     <el-card class="glass filter-card">
       <div class="filter-row">
-        <el-input v-model="filters.name" :placeholder="$t('account_name')" size="small" class="filter-input" />
-        <el-input v-model="filters.enterprise" :placeholder="$t('enterprise_name')" size="small" class="filter-input" />
-        <el-select v-model="filters.svcType" :placeholder="$t('service_type')" size="small" class="filter-input"
+        <el-input v-model="filters.account" :placeholder="$t('account_name')" size="small" class="filter-input" />
+        <el-select v-model="filters.company" :placeholder="$t('enterprise_name')" size="small" class="filter-input"
           clearable>
-          <el-option value="" :label="$t('all_types')" />
+          <el-option v-for="item in partnerOptions" :key="item.companyCode" :label="item.companyName"
+            :value="item.companyCode" />
+        </el-select>
+        <el-select v-model="filters.serviceType" :placeholder="$t('service_type')" size="small" class="filter-input"
+          clearable>
           <el-option value="NRTK" label="NRTK" />
           <el-option value="PPP-RTK" label="PPP-RTK" />
         </el-select>
-        <el-select v-model="filters.activated" :placeholder="$t('activation_status')" size="small" class="filter-input"
+        <el-select v-model="filters.status" :placeholder="$t('activation_status')" size="small" class="filter-input"
           clearable>
-          <el-option value="" :label="$t('all_status')" />
-          <el-option value="activated" :label="$t('activated')" />
-          <el-option value="inactive" :label="$t('inactive')" />
+          <el-option v-for="item in statusList" :key="item.value" :label="item.label" :value="item.value" />
         </el-select>
-        <el-select v-model="filters.mode" :placeholder="$t('account_mode')" size="small" class="filter-input" clearable>
-          <el-option value="" :label="$t('all_modes')" />
+        <el-select v-model="filters.accountType" :placeholder="$t('account_mode')" size="small" class="filter-input"
+          clearable>
           <el-option value="Ntrip" label="Ntrip" />
           <el-option value="SDK" label="SDK" />
         </el-select>
-        <el-select v-model="filters.spec" :placeholder="$t('account_spec')" size="small" class="filter-input" clearable>
-          <el-option value="" :label="$t('all_specs')" />
-          <el-option value="year" :label="$t('year')" />
-          <el-option value="month" :label="$t('month')" />
-          <el-option value="day" :label="$t('day')" />
-        </el-select>
-        <el-select v-model="filters.device" :placeholder="$t('device_type')" size="small" class="filter-input"
+        <el-select v-model="filters.specType" :placeholder="$t('account_spec')" size="small" class="filter-input"
           clearable>
-          <el-option value="" :label="$t('all_devices')" />
-          <el-option value="GNSS-Receiver-V3" label="GNSS-Receiver-V3" />
-          <el-option value="Drone-M300-RTK" label="Drone-M300-RTK" />
-          <el-option value="Agri-Drone-P100" label="Agri-Drone-P100" />
-          <el-option value="RoboTaxi-Gen5" label="RoboTaxi-Gen5" />
+          <el-option v-for="item in pecttypes" :key="item.value" :label="item.label" :value="item.value" />
         </el-select>
         <el-button size="small" class="btn-search" @click="applyFilter">{{ $t('search') }}</el-button>
         <el-button size="small" class="btn-reset" @click="resetFilter">{{ $t('reset') }}</el-button>
       </div>
     </el-card>
     <el-card class="glass">
-      <el-table :data="paginatedAccounts" size="small" class="dark-table">
-        <el-table-column prop="id" label="#" min-width="60" />
-        <el-table-column prop="name" :label="$t('account_name')">
+      <el-table :data="dataList" v-loading="tableLoading" size="small" class="dark-table">
+        <el-table-column type="index" width="50" />
+        <el-table-column prop="user" :label="$t('account_name')">
           <template slot-scope="scope">
-            <span class="text-blue">{{ scope.row.name }}</span>
+            <span class="text-blue">{{ scope.row.user }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="password" :label="$t('password')">
+        <el-table-column prop="pwd" :label="$t('password')">
           <template slot-scope="scope">
             <span class="text-gray text-xs">
-              {{ visiblePasswordIds[scope.row.id] ? scope.row.password : '••••••••' }}
+              {{ visiblePasswordIds[scope.row.id] ? scope.row.pwd : '••••••••' }}
             </span>
           </template>
         </el-table-column>
-        <el-table-column prop="enterprise" :label="$t('enterprise_name')" />
-        <el-table-column prop="svcType" :label="$t('service_type')" width="100">
+        <el-table-column prop="companyName" :label="$t('enterprise_name')" />
+        <el-table-column prop="serviceType" :label="$t('service_type')" width="100">
           <template slot-scope="scope">
-            <el-tag :type="scope.row.svcType === 'NRTK' ? 'primary' : 'info'" size="mini">{{ scope.row.svcType
+            <el-tag :type="scope.row.serviceType === 'NRTK' ? 'primary' : 'info'" size="mini">{{ scope.row.serviceType
               }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="mode" :label="$t('account_mode')" />
-        <el-table-column prop="spec" :label="$t('account_spec')">
-          <template slot-scope="scope">{{ scope.row.spec }}/{{ scope.row.stack }}</template>
+        <el-table-column prop="accountType" :label="$t('account_mode')" />
+        <el-table-column prop="specType" :label="$t('account_spec')">
+          <template slot-scope="scope">{{ scope.row.specType | transText(pecttypes) }}/{{ scope.row.specNumber
+            }}</template>
         </el-table-column>
         <el-table-column prop="activated" :label="$t('activation_status')" width="100">
           <template slot-scope="scope">
-            <el-tag :type="scope.row.activated === 'activated' ? 'success' : 'info'" size="mini">{{ scope.row.activated
-              }}</el-tag>
+            <el-tag :type="scope.row.activated === 1 ? 'success' : 'info'" size="mini">{{ scope.row.activated |
+              transText(statusList)
+            }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="activationTime" :label="$t('activation_time')" width="120" />
-        <el-table-column prop="created" :label="$t('created_time')" width="100" />
-        <el-table-column prop="expires" :label="$t('expire_time')" width="100" />
+        <el-table-column prop="activeTime" :label="$t('activation_time')" width="120" />
+        <el-table-column prop="createTime" :label="$t('created_time')" width="100" />
+        <el-table-column prop="expireTime" :label="$t('expire_time')" width="100" />
         <el-table-column :label="$t('actions')" width="140">
           <template slot-scope="scope">
             <el-button type="text" size="mini" @click="showPassword(scope.row)">{{ $t('show') }}</el-button>
@@ -87,17 +80,9 @@
         </el-table-column>
       </el-table>
       <div class="pagination-bar">
-        <el-pagination
-          :key="$i18n.locale"
-          background
-          layout="total, sizes, prev, pager, next, jumper"
-          :current-page.sync="currentPage"
-          :page-sizes="[10, 20, 50, 100]"
-          :page-size="pageSize"
-          :total="filteredAccounts.length"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        />
+        <el-pagination :key="$i18n.locale" background layout="total, sizes, prev, pager, next, jumper"
+          :current-page.sync="currentPage" :page-sizes="[10, 20, 50, 100]" :page-size="pageSize" :total="total"
+          @size-change="handleSizeChange" @current-change="handleCurrentChange" />
       </div>
     </el-card>
 
@@ -120,41 +105,58 @@
 </template>
 
 <script>
-import { DB, updatePassword, exportAccountsCSV } from '@/data/dashboardDB'
-import { STATUSENUM } from '@/common/js/const'
+import { STATUSENUM, RES_SUCCESS, PECTYPEENUM, } from '@/common/js/const'
+import { ntripAccountListByOrderNo, ntripAccountSearch, ntripAccountChgpwd, getPartnerSearch } from '@/common/js/api.js'
 export default {
   name: 'DashboardAccounts',
   data() {
     return {
-      DB,
-      filters: { name: '', enterprise: '', svcType: '', activated: '', mode: '', spec: '', device: '' },
+      filters: { account: '', company: null, serviceType: null, status: null, specType: null, accountType: null },
       currentPage: 1,
       pageSize: 10,
+      total: 0,
       modalVisible: false,
-      passwordForm: { id: null, name: '', newPassword: '' },
+      passwordForm: { id: null, user: '', newPassword: '' },
       visiblePasswordIds: {},
-      statusList: STATUSENUM
+      statusList: STATUSENUM,
+      tableLoading: false,
+      pecttypes: PECTYPEENUM,
+      partnerOptions: [],
+      dataList: []
     }
   },
   computed: {
-    filteredAccounts() {
-      return DB.accounts.filter(a => {
-        const matchName = !this.filters.name || a.name.toLowerCase().includes(this.filters.name.toLowerCase())
-        const matchEnt = !this.filters.enterprise || a.enterprise.toLowerCase().includes(this.filters.enterprise.toLowerCase())
-        const matchType = !this.filters.svcType || a.svcType === this.filters.svcType
-        const matchStatus = !this.filters.activated || a.activated === this.filters.activated
-        const matchMode = !this.filters.mode || a.mode === this.filters.mode
-        const matchSpec = !this.filters.spec || a.spec === this.filters.spec
-        const matchDevice = !this.filters.device || a.device === this.filters.device
-        return matchName && matchEnt && matchType && matchStatus && matchMode && matchSpec && matchDevice
-      })
-    },
-    paginatedAccounts() {
-      const start = (this.currentPage - 1) * this.pageSize
-      return this.filteredAccounts.slice(start, start + this.pageSize)
-    }
+
+  },
+  mounted() {
+    this.getPartnerList()
+    this.getNtripAccountSearch()
   },
   methods: {
+    getNtripAccountSearch() {
+      this.tableLoading = true
+      const params = { ...this.filters, pageNum: this.currentPage, pageSize: this.pageSize }
+      ntripAccountSearch(params).then(res => {
+        if (res.code === RES_SUCCESS || res.code === 200) {
+          this.dataList = res.result.records
+          this.total = res.result.total
+        } else {
+          this.$message.warning(res.message)
+        }
+      }).finally(() => {
+        this.tableLoading = false
+      })
+    },
+    getPartnerList() {
+      getPartnerSearch({ pageNum: 1, pageSize: 9999 }).then(res => {
+        if (res.code === RES_SUCCESS || res.code === 200) {
+          this.partnerOptions = res.result.records
+        } else {
+          this.$message.warning(res.message)
+        }
+      }
+      )
+    },
     showPassword(row) {
       this.$alert(this.$t('account_label') + ': ' + row.name + '\n' + this.$t('password_label') + ': ' + row.password, this.$t('account_password_title'), { confirmButtonText: this.$t('ok') }).catch(() => { })
     },
@@ -163,10 +165,12 @@ export default {
       this.modalVisible = true
     },
     handleSavePassword() {
+      ntripAccountChgpwd().then()(res => {
+
+      })
       updatePassword(this.passwordForm.id, this.passwordForm.newPassword)
       this.modalVisible = false
     },
-    exportAccountsCSV,
     handleSizeChange(size) {
       this.pageSize = size
       this.currentPage = 1
@@ -176,10 +180,15 @@ export default {
     },
     applyFilter() {
       this.currentPage = 1
+      this.getNtripAccountSearch()
     },
     resetFilter() {
-      this.filters = { name: '', enterprise: '', svcType: '', activated: '', mode: '', spec: '', device: '' }
+      this.filters = { account: '', company: null, serviceType: null, status: null, specType: null, accountType: null }
       this.currentPage = 1
+      this.getNtripAccountSearch()
+    },
+    exportAccountsCSV() {
+
     }
   }
 }

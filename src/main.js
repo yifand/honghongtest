@@ -7,12 +7,15 @@ import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import './assets/styles/global.scss'
 import * as filters from '@/common/js/filters'
+import _ from 'lodash'
 
 Object.keys(filters).forEach(key => {
   Vue.filter(key, filters[key])
 })
 
 Vue.use(ElementUI)
+
+Vue.prototype._ = _
 
 Vue.config.productionTip = false
   

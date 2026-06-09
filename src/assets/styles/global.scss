@@ -294,6 +294,10 @@ a {
   background-color: #121c31 !important;
 }
 
+#app .el-table.dark-table .el-loading-mask {
+  background-color: rgba(15, 23, 42, 0.85) !important;
+}
+
 .dark-dialog {
   background: rgba(15, 23, 42, 0.95) !important;
   backdrop-filter: blur(20px);
@@ -352,6 +356,172 @@ a {
       background: rgba(255, 255, 255, 0.05) !important;
     }
   }
+}
+
+// Date / Time picker panels
+.el-picker-panel {
+  background: rgba(15, 23, 42, 0.95) !important;
+  border: 1px solid $border-color !important;
+  color: #fff !important;
+  backdrop-filter: blur(10px);
+}
+
+.el-picker-panel__body-wrapper {
+  background: transparent !important;
+}
+
+.el-picker-panel__sidebar {
+  background: rgba(15, 23, 42, 0.95) !important;
+  border-right: 1px solid $border-color !important;
+}
+
+.el-picker-panel__shortcut {
+  color: $text-gray-300 !important;
+
+  &:hover {
+    color: $blue-500 !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+  }
+}
+
+.el-picker-panel__icon-btn {
+  color: $text-gray-400 !important;
+
+  &:hover {
+    color: #fff !important;
+  }
+}
+
+.el-date-picker__header-label {
+  color: #fff !important;
+
+  &:hover {
+    color: $blue-500 !important;
+  }
+}
+
+.el-date-table th {
+  color: $text-gray-400 !important;
+  border-bottom: 1px solid $border-color !important;
+}
+
+.el-date-table td {
+  color: #fff !important;
+}
+
+.el-date-table td.prev-month,
+.el-date-table td.next-month {
+  color: $text-gray-500 !important;
+}
+
+.el-date-table td.disabled {
+  color: $text-gray-500 !important;
+  background: transparent !important;
+}
+
+.el-date-table td.available:hover {
+  color: $blue-500 !important;
+}
+
+.el-date-table td.today span {
+  color: $blue-500 !important;
+}
+
+.el-date-table td.current:not(.disabled) span {
+  background: linear-gradient(135deg, $blue-500, $cyan-500) !important;
+  color: #fff !important;
+}
+
+.el-date-table td.start-date span,
+.el-date-table td.end-date span {
+  background: linear-gradient(135deg, $blue-500, $cyan-500) !important;
+  color: #fff !important;
+}
+
+.el-date-table td.in-range div {
+  background: rgba(59, 130, 246, 0.15) !important;
+}
+
+.el-date-table td.in-range div:hover {
+  background: rgba(59, 130, 246, 0.25) !important;
+}
+
+.el-month-table td .cell {
+  color: #fff !important;
+}
+
+.el-month-table td.disabled .cell {
+  color: $text-gray-500 !important;
+}
+
+.el-month-table td .cell:hover {
+  color: $blue-500 !important;
+}
+
+.el-month-table td.current:not(.disabled) .cell {
+  color: $blue-500 !important;
+}
+
+.el-year-table td .cell {
+  color: #fff !important;
+}
+
+.el-year-table td.disabled .cell {
+  color: $text-gray-500 !important;
+}
+
+.el-year-table td .cell:hover {
+  color: $blue-500 !important;
+}
+
+.el-year-table td.current:not(.disabled) .cell {
+  color: $blue-500 !important;
+}
+
+// Time spinner panel
+.el-time-panel {
+  background: rgba(15, 23, 42, 0.95) !important;
+  border: 1px solid $border-color !important;
+  backdrop-filter: blur(10px);
+}
+
+.el-time-spinner__item {
+  color: $text-gray-300 !important;
+
+  &:hover:not(.disabled):not(.active) {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: #fff !important;
+  }
+
+  &.active:not(.disabled) {
+    color: $blue-500 !important;
+    font-weight: 600;
+  }
+
+  &.disabled {
+    color: $text-gray-500 !important;
+  }
+}
+
+.el-time-panel__btn {
+  color: $text-gray-300 !important;
+
+  &.confirm {
+    color: $blue-500 !important;
+  }
+}
+
+.el-time-panel__footer {
+  border-top: 1px solid $border-color !important;
+}
+
+.el-picker-panel__footer {
+  background: rgba(15, 23, 42, 0.95) !important;
+  border-top: 1px solid $border-color !important;
+}
+
+.el-picker-panel__link-btn {
+  color: $blue-500 !important;
 }
 
 .el-input-number .el-input__inner {
@@ -475,4 +645,33 @@ a {
 .el-pagination.is-background .btn-next:disabled {
   background: rgba(255, 255, 255, 0.02) !important;
   color: $text-gray-500 !important;
+}
+
+// Date range editor input
+.el-range-editor {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #fff !important;
+}
+
+.el-range-editor.is-active {
+  border-color: $blue-500 !important;
+}
+
+.el-range-editor .el-range-input {
+  background: transparent !important;
+  color: #fff !important;
+}
+
+.el-range-editor .el-range-input::placeholder {
+  color: $text-gray-500 !important;
+}
+
+.el-range-editor .el-range-separator {
+  color: $text-gray-400 !important;
+}
+
+.el-range-editor .el-range__icon,
+.el-range-editor .el-range__close-icon {
+  color: $text-gray-400 !important;
 }

@@ -5,6 +5,7 @@ Vue.use(Vuex)
 
 const savedLang = localStorage.getItem('app_lang') || 'en'
 const savedToken = localStorage.getItem('token') || ''
+const savedUserName = localStorage.getItem('userName') || ''
 
 export default new Vuex.Store({
   state: {
@@ -13,7 +14,7 @@ export default new Vuex.Store({
     token: savedToken,
     role:0,
     authoritys:'',
-    userName:''
+    userName: savedUserName
   },
   mutations: {
     SET_LANG(state, lang) {
@@ -28,6 +29,11 @@ export default new Vuex.Store({
     },
     SET_USERNAME(state, userName) {
       state.userName = userName
+      if (userName) {
+        localStorage.setItem('userName', userName)
+      } else {
+        localStorage.removeItem('userName')
+      }
     },
     SET_AUTHORITYS(state, authoritys){
       state.authoritys =authoritys

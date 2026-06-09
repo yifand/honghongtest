@@ -38,11 +38,11 @@ export const MODELENUM = [
 export const STATUSENUM = [
   {
     label: i18n.t('active'),
-    value: '1'
+    value: 1
   },
   {
     label: i18n.t('inactive'),
-    value: '0'
+    value: 0
   }
 ]
 export const PECTYPEENUM = [

@@ -13,7 +13,7 @@
       </div>
     </el-card>
     <el-card class="glass">
-      <el-table :data="dataList" size="small" class="dark-table">
+      <el-table v-loading="tableLoading" :data="dataList" size="small" class="dark-table">
         <el-table-column type="index" width="50">
         </el-table-column>
         <el-table-column prop="companyName" :label="$t('partner_name')" />
@@ -80,6 +80,7 @@ export default {
       total: 0,
       modalVisible: false,
       modalReadonly: false,
+      tableLoading: false,
       form: this.emptyForm(),
       formRules: {
         companyName: [
@@ -122,6 +123,7 @@ export default {
       })
     },
     getList() {
+      this.tableLoading = true
       const params = { ...this.filters, pageNum: this.pageNum, pageSize: this.pageSize }
       getPartnerSearch(params).then(res => {
         if (res.code === RES_SUCCESS || res.code === 200) {
@@ -130,8 +132,9 @@ export default {
         } else {
           this.$message.warning(res.message)
         }
-      }
-      )
+      }).finally(() => {
+        this.tableLoading = false
+      })
     },
     async handleSave() {
       this.$refs.partnerForm.validate(async valid => {

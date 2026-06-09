@@ -88,6 +88,21 @@ const apiPathNtripOrderSearch= `${PATH_APISERVICE}/ntripOrder/search`
 const apiPathNtripOrderEdit= `${PATH_APISERVICE}/ntripOrder/edit`
 const apiPathNtripOrderPush= `${PATH_APISERVICE}/ntripOrder/push`
 
+//账号管理
+const apiPathNtripAccountListByOrderNo= `${PATH_APISERVICE}/ntripAccount/listByOrderNo`
+const apiPathNtripAccountSearch= `${PATH_APISERVICE}/ntripAccount/search`
+const apiPathNtripAccountChgpwd= `${PATH_APISERVICE}/ntripOrder/chgpwd`
+
+export function ntripAccountListByOrderNo (params) {
+  return _postData(apiPathNtripAccountListByOrderNo, params)
+}
+export function ntripAccountSearch (params) {
+  return _postData(apiPathNtripAccountSearch, params)
+}
+export function ntripAccountChgpwd (params) {
+  return _postData(apiPathNtripAccountChgpwd, params)
+}
+
 export function ntripOrderCreate (params) {
   return _postData(apiPathNtripOrderCreate, params)
 }
@@ -274,5 +289,5 @@ export function geo_CodeList () {
 }
 
 export function geo_getAreaList (params) {
-  return _getData(apiPath_Geo_getAreaList, params)
+  return _getData(apiPath_Geo_getAreaList, params,true)
 }

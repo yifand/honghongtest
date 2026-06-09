@@ -7,6 +7,8 @@
 <script>
 /* global L */
 import config from '../../config'
+import { geo_getAreaList } from '@/common/js/api'
+import { RES_SUCCESS } from '@/common/js/const.js'
 
 export default {
   name: 'CoverageMap',
@@ -18,12 +20,21 @@ export default {
       searchMarker: null,
       osm: null,
       amap: null,
-      currentMarker: null
-
+      currentMarker: null,
+      pointsGroup: [],
+      polygonList: []
+    }
+  },
+  watch: {
+    pointsGroup(val) {
+      if (val) {
+        this.updateNtrpLayer()
+      }
     }
   },
   mounted() {
     this.initMap()
+    this.getGeoList()
   },
   beforeDestroy() {
     if (this.map) {
@@ -71,48 +82,11 @@ export default {
       L.tileLayer(`https://t{s}.tianditu.gov.cn/cva_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=cva&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=${config.token}`, {
         subdomains: ['0', '1', '2', '3', '4', '5', '6', '7']
       }).addTo(this.map);
-      // this.map.on('moveend zoomend', this.updateBaseLayer);
-      // this.updateBaseLayer()
 
       // L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', {
       //   subdomains: ['a', 'b', 'c', 'd'],
       //   attribution: '© CARTO | © OpenStreetMap contributors'
       // }).addTo(this.map);
-      // NRTK coverage areas
-      const nrtkAreas = []
-
-      // Japan
-      nrtkAreas.push(L.rectangle([[30, 128], [45, 149]], {
-        color: '#f97316', weight: 2, fillColor: '#f97316', fillOpacity: 0.25
-      }).bindPopup('Japan - Full NRTK Coverage'))
-
-      // Korea
-      nrtkAreas.push(L.rectangle([[33, 124], [39, 131]], {
-        color: '#f97316', weight: 2, fillColor: '#f97316', fillOpacity: 0.25
-      }).bindPopup('Korea - Full NRTK Coverage'))
-
-      // East China
-      nrtkAreas.push(L.rectangle([[20, 105], [40, 125]], {
-        color: '#f97316', weight: 2, fillColor: '#f97316', fillOpacity: 0.25
-      }).bindPopup('China East - Full NRTK Coverage'))
-
-      // Southeast Asia
-      nrtkAreas.push(L.rectangle([[5, 100], [23, 110]], {
-        color: '#f97316', weight: 2, fillColor: '#f97316', fillOpacity: 0.25
-      }).bindPopup('Southeast Asia - Full NRTK Coverage'))
-
-      // Western Europe
-      nrtkAreas.push(L.rectangle([[41, -5], [51, 10]], {
-        color: '#f97316', weight: 2, fillColor: '#f97316', fillOpacity: 0.25
-      }).bindPopup('Western Europe - Full NRTK Coverage'))
-
-      // Australia
-      nrtkAreas.push(L.rectangle([[-44, 112], [-10, 155]], {
-        color: '#f97316', weight: 2, fillColor: '#f97316', fillOpacity: 0.15
-      }).bindPopup('Australia - NRTK Coverage'))
-
-      this.nrtkLayer = L.layerGroup(nrtkAreas)
-      this.map.addLayer(this.nrtkLayer)
 
       // PPP-RTK global sparse layer
       this.pppRTKLayer = L.layerGroup([
@@ -122,47 +96,90 @@ export default {
       ])
 
       // City marker dots
-      const dotPositions = [
-        { lat: -33, lng: 151, label: 'Sydney' },
-        { lat: -37, lng: 144, label: 'Melbourne' },
-        { lat: -27, lng: 153, label: 'Brisbane' },
-        { lat: -31, lng: 115, label: 'Perth' },
-        { lat: -34, lng: 138, label: 'Adelaide' },
-        { lat: 1, lng: 103, label: 'Singapore' },
-        { lat: 13, lng: 100, label: 'Bangkok' },
-        { lat: 14, lng: 121, label: 'Manila' },
-        { lat: 3, lng: 101, label: 'Kuala Lumpur' },
-        { lat: 31, lng: 121, label: 'Shanghai' },
-        { lat: 39, lng: 116, label: 'Beijing' },
-        { lat: 23, lng: 113, label: 'Guangzhou' },
-        { lat: 30, lng: 114, label: 'Wuhan' },
-        { lat: 35, lng: 139, label: 'Tokyo' },
-        { lat: 37, lng: 127, label: 'Seoul' },
-        { lat: 34, lng: 135, label: 'Osaka' },
-        { lat: 48, lng: 2, label: 'Paris' },
-        { lat: 51, lng: 0, label: 'London' },
-        { lat: 52, lng: 13, label: 'Berlin' },
-        { lat: 41, lng: 2, label: 'Barcelona' },
-        { lat: 45, lng: 9, label: 'Milan' }
-      ]
+      // const dotPositions = [
+      //   { lat: -33, lng: 151, label: 'Sydney' },
+      //   { lat: -37, lng: 144, label: 'Melbourne' },
+      //   { lat: -27, lng: 153, label: 'Brisbane' },
+      //   { lat: -31, lng: 115, label: 'Perth' },
+      //   { lat: -34, lng: 138, label: 'Adelaide' },
+      //   { lat: 1, lng: 103, label: 'Singapore' },
+      //   { lat: 13, lng: 100, label: 'Bangkok' },
+      //   { lat: 14, lng: 121, label: 'Manila' },
+      //   { lat: 3, lng: 101, label: 'Kuala Lumpur' },
+      //   { lat: 31, lng: 121, label: 'Shanghai' },
+      //   { lat: 39, lng: 116, label: 'Beijing' },
+      //   { lat: 23, lng: 113, label: 'Guangzhou' },
+      //   { lat: 30, lng: 114, label: 'Wuhan' },
+      //   { lat: 35, lng: 139, label: 'Tokyo' },
+      //   { lat: 37, lng: 127, label: 'Seoul' },
+      //   { lat: 34, lng: 135, label: 'Osaka' },
+      //   { lat: 48, lng: 2, label: 'Paris' },
+      //   { lat: 51, lng: 0, label: 'London' },
+      //   { lat: 52, lng: 13, label: 'Berlin' },
+      //   { lat: 41, lng: 2, label: 'Barcelona' },
+      //   { lat: 45, lng: 9, label: 'Milan' }
+      // ]
 
-      dotPositions.forEach(pos => {
-        const marker = L.circleMarker([pos.lat, pos.lng], {
-          radius: 4,
-          fillColor: '#f97316',
-          color: '#f97316',
-          weight: 1,
-          opacity: 0.8,
-          fillOpacity: 0.6
-        }).bindPopup(pos.label + ' - NRTK Station')
-        this.nrtkLayer.addLayer(marker)
+      // dotPositions.forEach(pos => {
+      //   const marker = L.circleMarker([pos.lat, pos.lng], {
+      //     radius: 4,
+      //     fillColor: '#f97316',
+      //     color: '#f97316',
+      //     weight: 1,
+      //     opacity: 0.8,
+      //     fillOpacity: 0.6
+      //   }).bindPopup(pos.label + ' - NRTK Station')
+      // this.nrtkLayer.addLayer(marker)
+      // })
+    },
+    getGeoList() {
+      geo_getAreaList({ code: 'World' }).then(res => {
+        if (res.code === RES_SUCCESS || res.code === 200) {
+          const data = res.result.geoAreaResultInfoList
+          data.forEach(item => {
+            const points = []
+            item.areaPointList.forEach(i => {
+              points.push([i.lat, i.lon]);
+            })
+            if (!this._.isEmpty(points)) {
+              this.pointsGroup.push(points);
+            }
+          })
+        }
+
       })
     },
+    updateNtrpLayer() {
+      // 移除旧面
+      this.polygonList.forEach(poly => this.map.removeLayer(poly));
+      this.polygonList = [];
+      this.pointsGroup.forEach(item => {
+        // 绘制多边形（封闭面）
+        const polygon = L.polygon(item, {
+          color: '#f97316',     // 边框颜色
+          weight: 2,            // 边框粗细
+          opacity: 0.8,         // 边框透明度
+          fillColor: '#f97316', // 填充颜色
+          fillOpacity: 0.2      // 填充透明度
+        }).addTo(this.map);
+        this.polygonList.push(polygon);
+      })
+      // 所有面自适应铺满视口
+      if (this.polygonList.length) this.map.fitBounds(L.featureGroup(this.polygonList).getBounds());
 
+    },
     toggleLayer(layer, checked) {
       if (!this.map) return
       if (layer === 'nrtk') {
-        checked ? this.map.addLayer(this.nrtkLayer) : this.map.removeLayer(this.nrtkLayer)
+        if (checked) {
+          this.polygonList.forEach(p => {
+            if (!this.map.hasLayer(p)) p.addTo(this.map);
+          })
+        } else {
+          this.polygonList.forEach(p => {
+            if (this.map.hasLayer(p)) this.map.removeLayer(p);
+          })
+        }
       } else if (layer === 'ppp-rtk') {
         checked ? this.map.addLayer(this.pppRTKLayer) : this.map.removeLayer(this.pppRTKLayer)
       }

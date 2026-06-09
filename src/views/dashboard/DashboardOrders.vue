@@ -40,9 +40,8 @@
       </div>
     </el-card>
     <el-card class="glass">
-      <el-table :data="dataList" size="small" class="dark-table">
-        <el-table-column type="index" width="50">
-        </el-table-column>
+      <el-table v-loading="tableLoading" :data="dataList" size="small" class="dark-table">
+        <el-table-column type="index" width="50" />
         <el-table-column prop="companyName" :label="$t('enterprise_name')" />
         <!-- <el-table-column prop="partner" :label="$t('partner_name')" width="120" /> -->
         <el-table-column prop="orderTitle" :label="$t('order_title')" />
@@ -54,13 +53,13 @@
         <el-table-column prop="serviceType" :label="$t('service_type')" width="100">
           <template slot-scope="scope">
             <el-tag :type="scope.row.serviceType === 'NRTK' ? 'primary' : 'info'" size="mini">{{ scope.row.serviceType
-              }}</el-tag>
+            }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="accountType" :label="$t('account_mode')" />
         <el-table-column prop="spec" :label="$t('account_spec')">
           <template slot-scope="scope">{{ scope.row.specType | transText(pecttypes) }}/{{ scope.row.specNumber
-          }}</template>
+            }}</template>
         </el-table-column>
         <el-table-column prop="quantity" :label="$t('quantity')" width="70" />
         <el-table-column prop="device" :label="$t('device_type')" width="140" />
@@ -114,7 +113,7 @@
               <span class="detail-value">
                 <el-tag :type="detailRow.serviceType === 'NRTK' ? 'primary' : 'info'" size="mini">{{
                   detailRow.serviceType
-                }}</el-tag>
+                  }}</el-tag>
               </span>
             </div>
             <div class="detail-item">
@@ -284,6 +283,7 @@ export default {
       modeOptions: ['Ntrip', 'SDK'],
       stackOptions: [1, 3, 5],
       dataList: [],
+      tableLoading: false,
       pecttypes: PECTYPEENUM,
       pushOptions: PUSHTYPEENUM
     }
@@ -337,6 +337,7 @@ export default {
       }
     },
     getList() {
+      this.tableLoading = true
       const params = { ...this.filters, pageNum: this.currentPage, pageSize: this.pageSize }
       ntripOrderSearch(params).then(res => {
         if (res.code === RES_SUCCESS || res.code === 200) {
@@ -345,8 +346,9 @@ export default {
         } else {
           this.$message.warning(res.message)
         }
-      }
-      )
+      }).finally(() => {
+        this.tableLoading = false
+      })
     },
     getPartnerList() {
       getPartnerSearch({ pageNum: 1, pageSize: 9999 }).then(res => {

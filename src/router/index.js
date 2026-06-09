@@ -11,6 +11,7 @@ import DashboardUsers from '@/views/dashboard/DashboardUsers.vue'
 import DashboardOrders from '@/views/dashboard/DashboardOrders.vue'
 import DashboardAccounts from '@/views/dashboard/DashboardAccounts.vue'
 import DashboardPartners from '@/views/dashboard/DashboardPartners.vue'
+import DashboardBilling from '@/views/dashboard/DashboardBilling.vue'
 import Knowledge from '@/views/Knowledge.vue'
 import NotFound from '@/views/NotFound.vue'
 
@@ -31,7 +32,8 @@ const routes = [
       { path: 'users', name: 'DashboardUsers', component: DashboardUsers, meta: { requiresAuth: true } },
       { path: 'orders', name: 'DashboardOrders', component: DashboardOrders, meta: { requiresAuth: true } },
       { path: 'accounts', name: 'DashboardAccounts', component: DashboardAccounts, meta: { requiresAuth: true } },
-      { path: 'partners', name: 'DashboardPartners', component: DashboardPartners, meta: { requiresAuth: true } }
+      { path: 'partners', name: 'DashboardPartners', component: DashboardPartners, meta: { requiresAuth: true } },
+      { path: 'billing', name: 'DashboardBilling', component: DashboardBilling, meta: { requiresAuth: true } }
     ]
   },
   { path: '/knowledge', name: 'Knowledge', component: Knowledge },

@@ -52,6 +52,13 @@
             </svg>
             <span slot="title">{{ $t('dash_partners') }}</span>
           </el-menu-item>
+          <!-- <el-menu-item index="/dashboard/billing">
+            <svg class="menu-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+            </svg>
+            <span slot="title">{{ $t('dash_billing') }}</span>
+          </el-menu-item> -->
         </el-menu>
 
         <div class="sidebar-footer">
@@ -87,10 +94,10 @@ export default {
   },
   methods: {
     handleLogout() {
-      logout().then(() => {
-        this.$store.dispatch('logout')
-        this.$router.push('/')
-      })
+      // logout().then(() => {
+      this.$store.dispatch('logout')
+      this.$router.push('/')
+      // })
 
     }
   }
@@ -104,7 +111,7 @@ export default {
 
 .dashboard-layout {
   display: flex;
-  min-height: calc(100vh - 64px);
+  height: calc(100vh - 64px);
 }
 
 .dashboard-sidebar {
@@ -113,6 +120,7 @@ export default {
   border-right: 1px solid $border-color;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 }
 
 .sidebar-header {

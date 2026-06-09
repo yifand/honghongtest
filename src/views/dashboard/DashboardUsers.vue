@@ -18,7 +18,7 @@
       </div>
     </el-card>
     <el-card class="glass">
-      <el-table :data="dataList" size="small" class="dark-table">
+      <el-table v-loading="tableLoading" :data="dataList" size="small" class="dark-table">
         <el-table-column type="index" width="50">
         </el-table-column>
         <el-table-column prop="enterpriseName" :label="$t('enterprise_name')" />
@@ -117,6 +117,7 @@ export default {
       dataList: [],
       total: 0,
       partnerOptions: [],
+      tableLoading: false,
       rules: {
         companyCode: [{ required: true, message: '请选择企业名称', trigger: 'change' }],
         userCode: [{ required: true, message: '请输入登录账号', trigger: 'blur' }],
@@ -140,6 +141,7 @@ export default {
       this.modalVisible = true
     },
     getList() {
+      this.tableLoading = true
       const params = { ...this.filters, pageNum: this.pageNum, pageSize: this.pageSize }
       getUserInfoSearch(params).then(res => {
         if (res.code === RES_SUCCESS || res.code === 200) {
@@ -148,8 +150,9 @@ export default {
         } else {
           this.$message.warning(res.message)
         }
-      }
-      )
+      }).finally(() => {
+        this.tableLoading = false
+      })
     },
     getPartnerList() {
       getPartnerSearch({ pageNum: 1, pageSize: 9999 }).then(res => {
