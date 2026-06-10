@@ -365,6 +365,7 @@ export default {
         if (!valid) return
         const res = this.form.id ? await ntripOrderEdit(this.form) : await ntripOrderCreate(this.form)
         if (res.code === RES_SUCCESS || res.code === 200) {
+          this.$message.success(this.form.id ? this.$t('edit_success') : this.$t('add_success'))
           this.getList()
           this.modalVisible = false
         } else {

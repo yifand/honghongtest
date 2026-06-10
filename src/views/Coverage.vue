@@ -72,11 +72,6 @@
             </div>
           </div>
 
-          <!-- Bottom Right - Links -->
-          <div class="coverage-panel link-panel glass">
-            <a href="#" class="panel-link">{{ $t('about_us') }}</a>
-            <a href="#" class="panel-link">{{ $t('user_agreement') }}</a>
-          </div>
         </div>
       </div>
 
@@ -127,20 +122,24 @@ export default {
       if (this.searchMode === 'coord') {
         const lng = parseFloat(this.longitude)
         const lat = parseFloat(this.latitude)
-        if (!isNaN(lat) && !isNaN(lng)) {
-          this.$refs.coverageMap.setView(lat, lng)
-        } else {
-          this.$message.warning('Please enter valid coordinates')
+        if (isNaN(lat) || isNaN(lng)) {
+          this.$message.warning(this.$t('enter_valid_coords'))
+          return
         }
+        if (lng < -180 || lng > 180 || lat < -90 || lat > 90) {
+          this.$message.warning(this.$t('coords_out_of_range'))
+          return
+        }
+        this.$refs.coverageMap.setView(lat, lng)
       } else if (this.searchMode === 'keyword') {
         const keyword = this.locationKeyword.trim()
         if (!keyword) {
-          this.$message.warning('Please enter a location keyword')
+          this.$message.warning(this.$t('enter_location'))
           return
         }
         const result = this.$refs.coverageMap.searchPlace(keyword)
         if (!result) {
-          this.$message.warning('Location not found')
+          this.$message.warning(this.$t('location_not_found'))
         }
       }
     },
@@ -155,7 +154,7 @@ export default {
 
 <style lang="scss" scoped>
 .coverage-page {
-  padding: 80px 0;
+  padding: 9px 0;
 }
 
 .section-header {
@@ -208,14 +207,8 @@ export default {
     left: 16px;
   }
 
-  &.link-panel {
-    bottom: 16px;
-    right: 16px;
-    padding: 8px 16px;
-    display: flex;
-    gap: 16px;
-  }
 }
+
 
 // Search Panel
 .mode-toggle,
@@ -346,17 +339,6 @@ export default {
   .layer-tag {
     background: rgba(234, 88, 12, 0.2);
     border: 1px solid rgba(234, 88, 12, 1);
-  }
-}
-
-// Link Panel
-.panel-link {
-  font-size: 13px;
-  color: $text-gray-400;
-  transition: color 0.2s;
-
-  &:hover {
-    color: #fff;
   }
 }
 

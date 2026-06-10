@@ -91,7 +91,7 @@ const apiPathNtripOrderPush= `${PATH_APISERVICE}/ntripOrder/push`
 //账号管理
 const apiPathNtripAccountListByOrderNo= `${PATH_APISERVICE}/ntripAccount/listByOrderNo`
 const apiPathNtripAccountSearch= `${PATH_APISERVICE}/ntripAccount/search`
-const apiPathNtripAccountChgpwd= `${PATH_APISERVICE}/ntripOrder/chgpwd`
+const apiPathNtripAccountChgpwd= `${PATH_APISERVICE}/ntripAccount/chgpwd`
 
 export function ntripAccountListByOrderNo (params) {
   return _postData(apiPathNtripAccountListByOrderNo, params)

@@ -146,7 +146,7 @@ export default {
 
 <style lang="scss" scoped>
 .products-page {
-  padding: 80px 0;
+  padding: 9px 0;
 }
 
 .section-header {

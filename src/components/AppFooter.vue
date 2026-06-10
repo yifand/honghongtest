@@ -30,15 +30,15 @@
         <h4 class="footer-title">{{ $t('support') }}</h4>
         <ul>
           <li><router-link to="/knowledge">{{ $t('documentation') }}</router-link></li>
-          <li><router-link to="/knowledge">FAQs</router-link></li>
-          <li><a href="#">Status</a></li>
-          <li><a href="#">Contact</a></li>
+          <li><router-link to="/knowledge">{{ $t('faqs') }}</router-link></li>
+          <li><a href="#">{{ $t('status') }}</a></li>
+          <li><a href="#">{{ $t('contact') }}</a></li>
         </ul>
       </div>
     </div>
 
     <div class="footer-bottom container">
-      &copy; 2024 GlobalService. All rights reserved.
+      {{ $t('copyright') }}
     </div>
   </footer>
 </template>

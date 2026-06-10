@@ -92,7 +92,7 @@ export default {
       this.pppRTKLayer = L.layerGroup([
         L.rectangle([[-60, -180], [70, 180]], {
           color: '#ea580c', weight: 0, fillColor: '#ea580c', fillOpacity: 0.05
-        }).bindPopup('Global PPP-RTK Coverage')
+        }).bindPopup(this.$t('global_ppp_rtk_coverage'))
       ])
 
       // City marker dots
@@ -208,14 +208,22 @@ export default {
         if (!this.map.hasLayer(this.osm)) this.map.addLayer(this.osm);
       }
     },
-    setView(lat, lng, zoom = 8) {
+    setView(lat, lng, zoom = 10) {
       if (this.map) {
+        // Remove previous search marker
+        if (this.searchMarker) {
+          this.map.removeLayer(this.searchMarker)
+        }
+        // Add new marker
+        this.searchMarker = L.marker([lat, lng]).addTo(this.map)
+        this.searchMarker.bindPopup(`<b>${lat}, ${lng}</b>`).openPopup()
+        // Pan and zoom to location
         this.map.setView([lat, lng], zoom)
       }
     },
     async searchPlace(keyword) {
       keyword = keyword.trim();
-      if (!keyword) return alert("请输入城市名");
+      if (!keyword) return alert(this.$t('please_enter_city'));
 
       // 判断是否包含中文 → 国内，用天地图
       // const isChinese = /[\u4e00-\u9fa5]/.test(keyword);
@@ -260,7 +268,7 @@ export default {
         //   .openPopup();
 
       } catch (e) {
-        alert("搜索失败：未找到该地点");
+        alert(this.$t('search_failed_not_found'));
         console.error(e);
       }
     },

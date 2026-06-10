@@ -24,7 +24,7 @@
         </el-table-column>
         <el-table-column prop="enterprise" :label="$t('enterprise_name')" />
         <el-table-column prop="note" :label="$t('notes')" />
-        <el-table-column :label="$t('actions')" width="140">
+        <el-table-column :label="$t('actions')" width="140" fixed="right">
           <template slot-scope="scope">
             <el-button type="text" size="mini" @click="openPartnerModal(scope.row, true)">{{ $t('detail') }}</el-button>
             <el-button type="text" size="mini" class="text-green" @click="openPartnerModal(scope.row, false)">{{
@@ -141,6 +141,7 @@ export default {
         if (!valid) return
         const res = this.form.id ? await partnerEdit(this.form) : await partnerCreate(this.form)
         if (res.code === RES_SUCCESS || res.code === 200) {
+          this.$message.success(this.form.id ? this.$t('edit_success') : this.$t('add_success'))
           this.getList()
           this.modalVisible = false
         } else {

@@ -61,9 +61,9 @@
           <template slot-scope="scope">{{ scope.row.specType | transText(pecttypes) }}/{{ scope.row.specNumber
             }}</template>
         </el-table-column>
-        <el-table-column prop="activated" :label="$t('activation_status')" width="100">
+        <el-table-column prop="status" :label="$t('activation_status')" width="100">
           <template slot-scope="scope">
-            <el-tag :type="scope.row.activated === 1 ? 'success' : 'info'" size="mini">{{ scope.row.activated |
+            <el-tag :type="scope.row.activated === 1 ? 'success' : 'info'" size="mini">{{ scope.row.status |
               transText(statusList)
             }}</el-tag>
           </template>
@@ -71,7 +71,7 @@
         <el-table-column prop="activeTime" :label="$t('activation_time')" width="120" />
         <el-table-column prop="createTime" :label="$t('created_time')" width="100" />
         <el-table-column prop="expireTime" :label="$t('expire_time')" width="100" />
-        <el-table-column :label="$t('actions')" width="140">
+        <el-table-column :label="$t('actions')" width="140" fixed="right">
           <template slot-scope="scope">
             <el-button type="text" size="mini" @click="showPassword(scope.row)">{{ $t('show') }}</el-button>
             <el-button type="text" size="mini" class="text-green" @click="openPasswordModal(scope.row)">{{
@@ -88,12 +88,12 @@
 
     <!-- Password Modal -->
     <el-dialog :title="$t('change_password')" :visible.sync="modalVisible" width="400px" custom-class="dark-dialog">
-      <el-form label-position="top" size="small">
+      <el-form label-position="top" :model="passwordForm" ref="passwordForm" size="small" :rules="rules">
         <el-form-item :label="$t('account_name')">
-          <el-input v-model="passwordForm.name" readonly />
+          <el-input v-model="passwordForm.account" readonly />
         </el-form-item>
-        <el-form-item :label="$t('new_password')">
-          <el-input v-model="passwordForm.newPassword" :placeholder="$t('placeholder_new_password')" />
+        <el-form-item :label="$t('new_password')" prop="pwd">
+          <el-input v-model="passwordForm.pwd" :placeholder="$t('placeholder_new_password')" />
         </el-form-item>
       </el-form>
       <span slot="footer">
@@ -116,13 +116,16 @@ export default {
       pageSize: 10,
       total: 0,
       modalVisible: false,
-      passwordForm: { id: null, user: '', newPassword: '' },
+      passwordForm: { id: null, account: '', pwd: '' },
       visiblePasswordIds: {},
       statusList: STATUSENUM,
       tableLoading: false,
       pecttypes: PECTYPEENUM,
       partnerOptions: [],
-      dataList: []
+      dataList: [],
+      rules: {
+        pwd: [{ required: true, message: this.$t('please_enter_new_password'), trigger: 'blur' }]
+      }
     }
   },
   computed: {
@@ -158,25 +161,35 @@ export default {
       )
     },
     showPassword(row) {
-      this.$alert(this.$t('account_label') + ': ' + row.name + '\n' + this.$t('password_label') + ': ' + row.password, this.$t('account_password_title'), { confirmButtonText: this.$t('ok') }).catch(() => { })
+      this.$alert(this.$t('account_label') + ': ' + row.user + '\n' + this.$t('password_label') + ': ' + row.pwd, this.$t('account_password_title'), { confirmButtonText: this.$t('ok') }).catch(() => { })
     },
     openPasswordModal(row) {
-      this.passwordForm = { id: row.id, name: row.name, newPassword: '' }
+      this.passwordForm = { id: row.user, account: row.user, pwd: '' }
       this.modalVisible = true
     },
     handleSavePassword() {
-      ntripAccountChgpwd().then()(res => {
-
+      this.$refs.passwordForm.validate(async valid => {
+        if (!valid) return
+        const res = await ntripAccountChgpwd(this.passwordForm)
+        if (res.code === RES_SUCCESS || res.code === 200) {
+          this.$message.success(this.$t('edit_success'))
+          this.getNtripAccountSearch()
+          this.modalVisible = false
+        } else {
+          this.$message.warning(res.message)
+        }
+        this.modalVisible = false
       })
-      updatePassword(this.passwordForm.id, this.passwordForm.newPassword)
-      this.modalVisible = false
     },
     handleSizeChange(size) {
       this.pageSize = size
       this.currentPage = 1
+      this.getNtripAccountSearch()
     },
     handleCurrentChange(page) {
       this.currentPage = page
+      this.getNtripAccountSearch()
+
     },
     applyFilter() {
       this.currentPage = 1

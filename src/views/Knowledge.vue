@@ -61,7 +61,7 @@ export default {
 
 <style lang="scss" scoped>
 .knowledge-page {
-  padding: 80px 0;
+  padding: 9px 0;
 }
 
 .section-header {

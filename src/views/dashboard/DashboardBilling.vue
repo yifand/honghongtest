@@ -5,31 +5,31 @@
     </div>
     <el-card class="glass filter-card">
       <div class="filter-row">
-        <el-input placeholder="请输入账号 / 设备ID" v-model="searchForm.account" clearable size="small" class="filter-input">
+        <el-input :placeholder="$t('search_account_device_placeholder')" v-model="searchForm.account" clearable size="small" class="filter-input">
         </el-input>
         <div class="picker__group">
-          <span>时间范围</span>
+          <span>{{ $t('time_range') }}</span>
           <el-date-picker v-model="searchForm.dateTimerRange" type="datetimerange" :picker-options="pickerOptions"
-            range-separator="-" start-placeholder="开始日期" end-placeholder="结束日期" value-format="yyyy-MM-dd HH:mm:ss"
+            range-separator="-" :start-placeholder="$t('start_date')" :end-placeholder="$t('end_date')" value-format="yyyy-MM-dd HH:mm:ss"
             align="right" popper-class="sidebar-right" size="small">
           </el-date-picker>
         </div>
-        <el-button class="btn-search" size="small" icon="el-icon-search" @click="getPilotInfo">查询</el-button>
-        <el-button class="btn-reset" size="small" @click="clearForm">重置</el-button>
+        <el-button class="btn-search" size="small" icon="el-icon-search" @click="getPilotInfo">{{ $t('query') }}</el-button>
+        <el-button class="btn-reset" size="small" @click="clearForm">{{ $t('reset') }}</el-button>
       </div>
     </el-card>
 
     <el-card class="glass table-card">
-      <div class="table-title">服务账号基本信息</div>
+      <div class="table-title">{{ $t('service_account_basic_info') }}</div>
       <el-table v-loading="accountInfoLoading" :data="accountInfo" stripe fit size="small" class="dark-table"
         style="width: 100%" :cell-style="{ 'user-select': 'text' }">
-        <el-table-column label="账号类型" prop="accountType" show-overflow-tooltip min-width="120">
+        <el-table-column :label="$t('account_type')" prop="accountType" show-overflow-tooltip min-width="120">
         </el-table-column>
-        <el-table-column label="账号名称" prop="account" show-overflow-tooltip min-width="120">
+        <el-table-column :label="$t('account_name')" prop="account" show-overflow-tooltip min-width="120">
         </el-table-column>
-        <el-table-column label="设备ID" prop="deviceId" show-overflow-tooltip min-width="80">
+        <el-table-column :label="$t('device_id')" prop="deviceId" show-overflow-tooltip min-width="80">
         </el-table-column>
-        <el-table-column label="当前状态" prop="status" show-overflow-tooltip min-width="80">
+        <el-table-column :label="$t('current_status')" prop="status" show-overflow-tooltip min-width="80">
           <template slot-scope="scope">
             <span :class="{
               'text-red':
@@ -38,35 +38,35 @@
             }" v-text="scope.row.status"></span>
           </template>
         </el-table-column>
-        <el-table-column label="信控状态" prop="creditStatus" show-overflow-tooltip min-width="80">
+        <el-table-column :label="$t('credit_status')" prop="creditStatus" show-overflow-tooltip min-width="80">
         </el-table-column>
-        <el-table-column label="过期时间" prop="expireTime" show-overflow-tooltip min-width="140">
+        <el-table-column :label="$t('expire_time_label')" prop="expireTime" show-overflow-tooltip min-width="140">
         </el-table-column>
       </el-table>
     </el-card>
 
     <el-card class="glass table-card">
-      <div class="table-title">最新信息</div>
+      <div class="table-title">{{ $t('latest_info') }}</div>
       <el-table v-loading="latestInfoLoading" :data="latestInfo" stripe fit size="small" class="dark-table"
         style="width: 100%" :cell-style="{ 'user-select': 'text' }">
-        <el-table-column label="当前状态" prop="status" show-overflow-tooltip min-width="120">
+        <el-table-column :label="$t('current_status')" prop="status" show-overflow-tooltip min-width="120">
           <template slot-scope="scope">{{
             scope.row.status | transText(pilotStatusEnum)
             }}</template>
         </el-table-column>
-        <el-table-column label="最近登录时间" prop="loginTime" show-overflow-tooltip min-width="140">
+        <el-table-column :label="$t('latest_login_time')" prop="loginTime" show-overflow-tooltip min-width="140">
         </el-table-column>
-        <el-table-column label="最近登出时间" prop="logoutTime" show-overflow-tooltip min-width="140">
+        <el-table-column :label="$t('latest_logout_time')" prop="logoutTime" show-overflow-tooltip min-width="140">
         </el-table-column>
-        <el-table-column label="接入方式" prop="switchType" show-overflow-tooltip min-width="80">
+        <el-table-column :label="$t('access_method')" prop="switchType" show-overflow-tooltip min-width="80">
         </el-table-column>
-        <el-table-column label="最近挂载点" prop="sourceNode" show-overflow-tooltip min-width="120">
+        <el-table-column :label="$t('latest_mount_point')" prop="sourceNode" show-overflow-tooltip min-width="120">
         </el-table-column>
-        <el-table-column label="最近GGA时间" prop="ggaTime" show-overflow-tooltip min-width="140">
+        <el-table-column :label="$t('latest_gga_time')" prop="ggaTime" show-overflow-tooltip min-width="140">
         </el-table-column>
-        <el-table-column label="最近播发时间" prop="broadcastTime" show-overflow-tooltip min-width="140">
+        <el-table-column :label="$t('latest_broadcast_time')" prop="broadcastTime" show-overflow-tooltip min-width="140">
         </el-table-column>
-        <el-table-column label="GGA状态" prop="locateStatus" show-overflow-tooltip min-width="80">
+        <el-table-column :label="$t('gga_status')" prop="locateStatus" show-overflow-tooltip min-width="80">
           <template slot-scope="scope">{{
             scope.row.locateStatus | transText(pilotLocateStatusEnum)
             }}</template>
@@ -75,7 +75,7 @@
     </el-card>
 
     <el-card class="glass table-card">
-      <div class="table-title">使用情况</div>
+      <div class="table-title">{{ $t('usage_stats') }}</div>
       <div class="user-charts" v-loading="logStatisticsLoading">
         <div class="user-lines" ref="userLines"></div>
         <div class="user-bars" ref="userBars"></div>
@@ -83,10 +83,10 @@
     </el-card>
 
     <el-card class="glass table-card">
-      <div class="table-title">异常信息</div>
+      <div class="table-title">{{ $t('abnormal_info') }}</div>
       <el-table v-loading="abnormalInfoLoading" :data="abnormalInfo" stripe fit size="small" class="dark-table"
         style="width: 100%" :cell-style="{ 'user-select': 'text' }">
-        <el-table-column label="序号" min-width="120">
+        <el-table-column :label="$t('order_no_label')" min-width="120">
           <template slot-scope="scope">
             {{
               scope.$index +
@@ -95,15 +95,15 @@
             }}
           </template>
         </el-table-column>
-        <el-table-column label="发生时间" prop="time" show-overflow-tooltip min-width="140">
+        <el-table-column :label="$t('occurred_time')" prop="time" show-overflow-tooltip min-width="140">
         </el-table-column>
-        <el-table-column label="客户端IP和端口" prop="ipPort" show-overflow-tooltip min-width="140">
+        <el-table-column :label="$t('client_ip_port')" prop="ipPort" show-overflow-tooltip min-width="140">
         </el-table-column>
-        <el-table-column label="挂载点" prop="mountPoint" show-overflow-tooltip min-width="100">
+        <el-table-column :label="$t('mount_point')" prop="mountPoint" show-overflow-tooltip min-width="100">
         </el-table-column>
-        <el-table-column label="报错内容" prop="errorDesc" show-overflow-tooltip min-width="160">
+        <el-table-column :label="$t('error_content')" prop="errorDesc" show-overflow-tooltip min-width="160">
         </el-table-column>
-        <el-table-column label="报错日志" prop="errorLog" show-overflow-tooltip min-width="200">
+        <el-table-column :label="$t('error_log')" prop="errorLog" show-overflow-tooltip min-width="200">
         </el-table-column>
       </el-table>
     </el-card>
@@ -131,10 +131,10 @@
     <!-- </el-card> -->
 
     <el-card class="glass table-card">
-      <div class="table-title">登录信息查询</div>
+      <div class="table-title">{{ $t('login_info_query') }}</div>
       <el-table v-loading="accountCoordInfoLoading" :data="accountCoordInfo" stripe fit size="small" class="dark-table"
         style="width: 100%" :cell-style="{ 'user-select': 'text' }">
-        <el-table-column label="序号" min-width="120">
+        <el-table-column :label="$t('order_no_label')" min-width="120">
           <template slot-scope="scope">
             {{
               scope.$index +
@@ -144,22 +144,22 @@
             }}
           </template>
         </el-table-column>
-        <el-table-column label="登录时间" prop="loginTime" show-overflow-tooltip min-width="160">
+        <el-table-column :label="$t('login_time')" prop="loginTime" show-overflow-tooltip min-width="160">
         </el-table-column>
-        <el-table-column label="坐标系" prop="coor" show-overflow-tooltip min-width="100">
+        <el-table-column :label="$t('coordinate_system')" prop="coor" show-overflow-tooltip min-width="100">
         </el-table-column>
-        <el-table-column label="挂载点" prop="mountPoint" show-overflow-tooltip min-width="120">
+        <el-table-column :label="$t('mount_point')" prop="mountPoint" show-overflow-tooltip min-width="120">
         </el-table-column>
-        <el-table-column label="服务端IP和端口" prop="hostPort" show-overflow-tooltip min-width="160">
+        <el-table-column :label="$t('server_ip_port')" prop="hostPort" show-overflow-tooltip min-width="160">
         </el-table-column>
       </el-table>
     </el-card>
 
     <el-card class="glass table-card">
-      <div class="table-title">用户信息查询</div>
+      <div class="table-title">{{ $t('user_info_query') }}</div>
       <el-table v-loading="historyInfoLoading" :data="historyInfo" stripe fit size="small" class="dark-table"
         style="width: 100%" :cell-style="{ 'user-select': 'text' }">
-        <el-table-column label="序号" min-width="100">
+        <el-table-column :label="$t('order_no_label')" min-width="100">
           <template slot-scope="scope">
             {{
               scope.$index +
@@ -168,21 +168,21 @@
             }}
           </template>
         </el-table-column>
-        <el-table-column label="发生时间" prop="time" show-overflow-tooltip min-width="160">
+        <el-table-column :label="$t('occurred_time')" prop="time" show-overflow-tooltip min-width="160">
         </el-table-column>
-        <el-table-column label="经度" prop="lon" show-overflow-tooltip min-width="110">
+        <el-table-column :label="$t('longitude_label')" prop="lon" show-overflow-tooltip min-width="110">
         </el-table-column>
-        <el-table-column label="纬度" prop="lat" show-overflow-tooltip min-width="100">
+        <el-table-column :label="$t('latitude_label')" prop="lat" show-overflow-tooltip min-width="100">
         </el-table-column>
-        <el-table-column label="省份" prop="country" show-overflow-tooltip min-width="80">
+        <el-table-column :label="$t('province')" prop="country" show-overflow-tooltip min-width="80">
         </el-table-column>
         <el-table-column label="GGA" prop="gga" show-overflow-tooltip min-width="400">
         </el-table-column>
       </el-table>
       <div class="pagination-bar">
         <el-button class="btn-reset" size="small" @click="changeHisPrevious"
-          :disabled="historyInfoCurrentPage <= 1">上一页</el-button>
-        <el-button class="btn-reset" size="small" @click="changeHisNext">下一页</el-button>
+          :disabled="historyInfoCurrentPage <= 1">{{ $t('previous_page') }}</el-button>
+        <el-button class="btn-reset" size="small" @click="changeHisNext">{{ $t('next_page') }}</el-button>
       </div>
     </el-card>
   </div>
@@ -220,109 +220,7 @@ export default {
           this.$root.$options.filters.timeFormat(new Date(), 'YMDHMS')
         ]
       },
-      pickerOptions: {
-        shortcuts: [
-          {
-            text: '最近30分钟',
-            onClick(picker) {
-              const end = new Date()
-              const start = new Date()
-              start.setTime(start.getTime() - 3600 * 1000 * 0.5)
-              picker.$emit('pick', [start, end])
-            }
-          },
-          {
-            text: '最近1小时',
-            onClick(picker) {
-              const end = new Date()
-              const start = new Date()
-              start.setTime(start.getTime() - 3600 * 1000 * 1)
-              picker.$emit('pick', [start, end])
-            }
-          },
-          {
-            text: '最近4小时',
-            onClick(picker) {
-              const end = new Date()
-              const start = new Date()
-              start.setTime(start.getTime() - 3600 * 1000 * 4)
-              picker.$emit('pick', [start, end])
-            }
-          },
-          {
-            text: '今天',
-            onClick: (picker) => {
-              const end = new Date()
-              const start = new Date()
-              start.setTime(
-                new Date(
-                  this.$root.$options.filters.timeFormat(Date.now(), 'YMD++')
-                )
-              )
-              picker.$emit('pick', [start, end])
-            }
-          },
-          {
-            text: '昨天',
-            onClick: (picker) => {
-              const end = new Date()
-              const start = new Date()
-              start.setTime(
-                new Date(
-                  this.$root.$options.filters.timeFormat(
-                    Date.now() - 24 * 60 * 60 * 1000,
-                    'YMD++'
-                  )
-                )
-              )
-              end.setTime(
-                new Date(
-                  this.$root.$options.filters.timeFormat(
-                    Date.now() - 24 * 60 * 60 * 1000,
-                    'YMD---'
-                  )
-                )
-              )
-              picker.$emit('pick', [start, end])
-            }
-          },
-          {
-            text: '最近一天',
-            onClick(picker) {
-              const end = new Date()
-              const start = new Date()
-              start.setTime(start.getTime() - 3600 * 1000 * 24 * 1)
-              picker.$emit('pick', [start, end])
-            }
-          },
-          {
-            text: '最近三天',
-            onClick(picker) {
-              const end = new Date()
-              const start = new Date()
-              start.setTime(start.getTime() - 3600 * 1000 * 24 * 3)
-              picker.$emit('pick', [start, end])
-            }
-          },
-          {
-            text: '最近五天',
-            onClick(picker) {
-              const end = new Date()
-              const start = new Date()
-              start.setTime(start.getTime() - 3600 * 1000 * 24 * 5)
-              picker.$emit('pick', [start, end])
-            }
-          },
-          {
-            text: '最近七天',
-            onClick(picker) {
-              const end = new Date()
-              const start = new Date()
-              start.setTime(start.getTime() - 3600 * 1000 * 24 * 7)
-              picker.$emit('pick', [start, end])
-            }
-          }],
-      },
+
       isFixedTop: false,
       coverageForm: {
         lat: '',

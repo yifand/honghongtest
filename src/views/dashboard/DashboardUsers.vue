@@ -34,12 +34,12 @@
         <el-table-column prop="resourcePool" :label="$t('resource_pool_name')" />
         <el-table-column prop="createTime" :label="$t('created_time')" min-width="100" />
         <el-table-column prop="updateTime" :label="$t('updated_time')" min-width="100" />
-        <el-table-column :label="$t('actions')" width="140">
+        <el-table-column :label="$t('actions')" width="140" fixed="right">
           <template slot-scope="scope">
             <el-button type="text" size="mini" @click="openUserModal(scope.row)">{{ $t('edit') }}</el-button>
             <el-button type="text" size="mini" class="text-red" @click="handleDeleteUser(scope.row.userCode)">{{
               $t('delete')
-              }}</el-button>
+            }}</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -119,9 +119,9 @@ export default {
       partnerOptions: [],
       tableLoading: false,
       rules: {
-        companyCode: [{ required: true, message: '请选择企业名称', trigger: 'change' }],
-        userCode: [{ required: true, message: '请输入登录账号', trigger: 'blur' }],
-        password: [{ required: true, message: '请输入登录密码', trigger: 'blur' }]
+        companyCode: [{ required: true, message: this.$t('please_select_enterprise'), trigger: 'change' }],
+        userCode: [{ required: true, message: this.$t('please_enter_account'), trigger: 'blur' }],
+        password: [{ required: true, message: this.$t('please_enter_password'), trigger: 'blur' }]
       }
     }
   },
@@ -169,6 +169,7 @@ export default {
         if (!valid) return
         const res = this.form.id ? await userInfoEdit(this.form) : await userInfoCreate(this.form)
         if (res.code === RES_SUCCESS || res.code === 200) {
+          this.$message.success(this.form.id ? this.$t('edit_success') : this.$t('add_success'))
           this.getList()
           this.modalVisible = false
         } else {
@@ -181,7 +182,7 @@ export default {
       this.$confirm(this.$t('confirm_delete') + ' — userCode: ' + userCode, '', { type: 'warning' }).then(() => {
         userInfoRemove({ userCode }).then(res => {
           if (res.code === RES_SUCCESS || res.code === 200) {
-            this.$message.success("删除成功！")
+            this.$message.success(this.$t('delete_success'))
             this.getList()
           } else {
             this.$message.warning(res.message)
