@@ -1,4 +1,4 @@
 # BitFun snapshot data - auto managed
 .bitfun/
 node_modules/
-dist/
+/dist/

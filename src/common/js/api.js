@@ -92,6 +92,11 @@ const apiPathNtripOrderPush= `${PATH_APISERVICE}/ntripOrder/push`
 const apiPathNtripAccountListByOrderNo= `${PATH_APISERVICE}/ntripAccount/listByOrderNo`
 const apiPathNtripAccountSearch= `${PATH_APISERVICE}/ntripAccount/search`
 const apiPathNtripAccountChgpwd= `${PATH_APISERVICE}/ntripAccount/chgpwd`
+const apiPathNtripAccountDownload= `${PATH_APISERVICE}/ntripAccount/download`
+
+//知识库
+ export const apiPathRagQuery= `${PATH_APISERVICE}/rag/query`
+
 
 export function ntripAccountListByOrderNo (params) {
   return _postData(apiPathNtripAccountListByOrderNo, params)
@@ -101,6 +106,9 @@ export function ntripAccountSearch (params) {
 }
 export function ntripAccountChgpwd (params) {
   return _postData(apiPathNtripAccountChgpwd, params)
+}
+export function ntripAccountDownload (params) {
+  return _postData(apiPathNtripAccountDownload,  params, true, true)
 }
 
 export function ntripOrderCreate (params) {

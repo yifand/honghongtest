@@ -106,7 +106,7 @@
 
 <script>
 import { STATUSENUM, RES_SUCCESS, PECTYPEENUM, } from '@/common/js/const'
-import { ntripAccountListByOrderNo, ntripAccountSearch, ntripAccountChgpwd, getPartnerSearch } from '@/common/js/api.js'
+import { ntripAccountListByOrderNo, ntripAccountDownload, ntripAccountSearch, ntripAccountChgpwd, getPartnerSearch } from '@/common/js/api.js'
 export default {
   name: 'DashboardAccounts',
   data() {
@@ -201,7 +201,24 @@ export default {
       this.getNtripAccountSearch()
     },
     exportAccountsCSV() {
-
+      ntripAccountDownload({ ...this.filters }).then(res => {
+        if (res.data && res.headers) {
+          const blob = new Blob([res.data], {
+            type: res.headers['content-type'] || 'application/octet-stream'
+          })
+          const contentDisposition = res.headers['content-disposition']
+          const fileName = contentDisposition
+            ? decodeURIComponent(contentDisposition.split('=')[1])
+            : $t('dash_accounts_title') + '.csv'
+          const link = document.createElement('a')
+          link.href = window.URL.createObjectURL(blob)
+          link.download = fileName
+          document.body.appendChild(link)
+          link.click()
+          window.URL.revokeObjectURL(link.href)
+          document.body.removeChild(link)
+        }
+      })
     }
   }
 }
