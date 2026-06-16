@@ -8,13 +8,14 @@ import 'element-ui/lib/theme-chalk/index.css'
 import './assets/styles/global.scss'
 import * as filters from '@/common/js/filters'
 import _ from 'lodash'
-
+import MarkdownItVue from 'markdown-it-vue'
+// 必须引入内置样式
+import 'markdown-it-vue/dist/markdown-it-vue.css'
 Object.keys(filters).forEach(key => {
   Vue.filter(key, filters[key])
 })
-
 Vue.use(ElementUI)
-
+Vue.use(MarkdownItVue)
 Vue.prototype._ = _
 
 Vue.config.productionTip = false

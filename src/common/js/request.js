@@ -348,27 +348,20 @@ export function streamFetch (
   url,
   data = {},
   onDataReceived,
-  onProgress,
   onComplete
 ) {
+
   const controller = new AbortController()
   const signal = controller.signal
-
   // 合并请求选项
   const fetchOptions = {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
+    token:  store.state.token,
     body: JSON.stringify(data),
     signal
-  }
-
-  const needAuthApi = url.includes('/llm/')
-  if (store.state.accessToken) {
-    if (needAuthApi) {
-      fetchOptions.headers.token = store.state.accessToken
-    }
   }
 
   // 返回Promise以便错误处理
@@ -380,10 +373,8 @@ export function streamFetch (
       if (!response.ok) {
         throw new Error(`请求失败: ${response.status} ${response.statusText}`)
       }
-            // 获取可读流
+      // 获取可读流
       const reader = response.body.getReader()
-      const contentLength = +response.headers.get('Content-Length') || 0
-      let receivedLength = 0
       const chunks = []
 
       // 读取流数据
@@ -392,23 +383,12 @@ export function streamFetch (
         if (done) {
           // 流读取完成
           if (onComplete) onComplete()
-          // 如果是下载场景，返回完整数据
-          // const fullData = chunks.length > 0 ? new Blob(chunks) : null
-          // resolve(fullData)
           break
         }
-
-        // 更新接收进度
-        receivedLength += value.length
-        if (onProgress && contentLength > 0) {
-          const percent = Math.round((receivedLength / contentLength) * 100)
-          onProgress(percent, receivedLength, contentLength)
-        }
-
         // 处理数据块
         chunks.push(value)
         if (onDataReceived) {
-          onDataReceived(value, receivedLength, controller)
+          onDataReceived(value, controller)
         }
       }
     } catch (error) {
@@ -420,4 +400,80 @@ export function streamFetch (
     result,
     abort: () => controller.abort()
   }))
+}
+
+/**
+ * Vue2 GET 流式SSE请求封装
+ * @param {String} url 请求地址
+ * @param {Object} params url参数
+ * @param {Object} headers 请求头
+ * @param {Function} onMessage 分片回调
+ * @param {Function} onEnd 结束回调
+ * @param {Function} onError 错误回调
+ */
+export function streamGetRequest({
+  url,
+  params = {},
+  headers = {},
+  onMessage,
+  onEnd,
+  onError
+}) {
+  const urlParams = new URLSearchParams(params);
+  const fullUrl = `${url}?${urlParams.toString()}`;
+  const fetchOptions = {
+    method: 'GET',
+    headers: {
+      Accept: "text/event-stream",
+      token:  store.state.token,
+      ...headers
+    },
+    mode: 'cors',
+    credentials: 'omit'
+  };
+
+  let reader = null;
+  const abortController = new AbortController();
+  fetchOptions.signal = abortController.signal;
+
+  // 发起请求
+  fetch(fullUrl.toString(), fetchOptions)
+    .then(async (res) => {
+      // 状态码校验
+      if (!res.ok) {
+        throw new Error(`请求失败，状态码：${res.status}`);
+      }
+      // 获取二进制流读取器
+      reader = res.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();        
+        if (done) {
+          // 流读取完毕
+          onEnd && onEnd(buffer);
+          break;
+        }        
+        // 二进制转文本
+        const chunk = decoder.decode(value, { stream: true });
+        buffer += chunk;
+        // 每拿到一段内容触发回调渲染
+        onMessage && onMessage(chunk, buffer);
+      }
+    })
+    .catch(err => {
+      console.log({err});
+      // 中断/网络/跨域错误捕获
+      if (err.name !== 'AbortError') {
+        onError && onError(err);
+      }
+    });
+
+  return {
+    abort: () => {
+      // abortController&&abortController.abort();
+      reader && reader.cancel();
+    }
+  };
 }
