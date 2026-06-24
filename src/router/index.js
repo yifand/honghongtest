@@ -50,16 +50,25 @@ const router = new VueRouter({
 
 router.beforeEach((to, from, next) => {
   const isLoggedIn = store.state.isLoggedIn
-
+  console.log({isLoggedIn},store.state);
+  
   if (to.matched.some(record => record.meta.requiresAuth)) {
     if (!isLoggedIn) {
+      console.log(11);
+      
       next({ path: '/login', query: { redirect: to.fullPath } })
     } else {
+      console.log(222);
+      
       next()
     }
   } else if (to.matched.some(record => record.meta.guest) && isLoggedIn) {
+    console.log(333);
+    
     next({ path: '/dashboard/overview', replace: true })
   } else {
+    console.log(444);
+    
     next()
   }
 })

@@ -107,6 +107,7 @@
 <script>
 import { STATUSENUM, RES_SUCCESS, PECTYPEENUM, } from '@/common/js/const'
 import { ntripAccountListByOrderNo, ntripAccountDownload, ntripAccountSearch, ntripAccountChgpwd, getPartnerSearch } from '@/common/js/api.js'
+import { validatePasswordComplexity } from '@/common/js/utils.js'
 export default {
   name: 'DashboardAccounts',
   data() {
@@ -124,7 +125,10 @@ export default {
       partnerOptions: [],
       dataList: [],
       rules: {
-        pwd: [{ required: true, message: this.$t('please_enter_new_password'), trigger: 'blur' }]
+        pwd: [
+          { required: true, message: this.$t('please_enter_new_password'), trigger: 'blur' },
+          { validator: (rule, value, callback) => validatePasswordComplexity(value, callback, this.$t), trigger: 'blur' }
+        ]
       }
     }
   },
@@ -166,6 +170,9 @@ export default {
     openPasswordModal(row) {
       this.passwordForm = { id: row.user, account: row.user, pwd: '' }
       this.modalVisible = true
+      this.$nextTick(() => {
+        this.$refs.passwordForm && this.$refs.passwordForm.clearValidate()
+      })
     },
     handleSavePassword() {
       this.$refs.passwordForm.validate(async valid => {

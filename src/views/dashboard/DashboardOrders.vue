@@ -53,16 +53,16 @@
         <el-table-column prop="serviceType" :label="$t('service_type')" width="100">
           <template slot-scope="scope">
             <el-tag :type="scope.row.serviceType === 'NRTK' ? 'primary' : 'info'" size="mini">{{ scope.row.serviceType
-              }}</el-tag>
+            }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="accountType" :label="$t('account_mode')" />
         <el-table-column prop="spec" :label="$t('account_spec')">
           <template slot-scope="scope">{{ scope.row.specType | transText(pecttypes) }}/{{ scope.row.specNumber
-          }}</template>
+            }}</template>
         </el-table-column>
         <el-table-column prop="quantity" :label="$t('quantity')" width="70" />
-        <el-table-column prop="device" :label="$t('device_type')" width="140" />
+        <el-table-column prop="deviceType" :label="$t('device_type')" width="140" />
         <el-table-column prop="accountsTxt" :label="$t('account_list')" min-width="160" show-overflow-tooltip />
         <el-table-column prop="orderTime" :label="$t('created_time')" width="110" />
         <el-table-column prop="status" :label="$t('status')" width="100">
@@ -93,8 +93,14 @@
     <el-dialog :title="$t('order_detail_title')" :visible.sync="detailVisible" width="520px" custom-class="dark-dialog">
       <div class="detail-body">
         <div class="detail-header">
-          <div class="detail-no">{{ detailRow.orderNo }}</div>
-          <div class="detail-title">{{ detailRow.orderTitle }}</div>
+          <div class="detail-no">
+            <span class="detail-label">{{ $t('order_no_label') }}</span>
+            <span>{{ detailRow.orderNo }}</span>
+          </div>
+          <div class="detail-title">
+            <span class="detail-label">{{ $t('order_title_label') }}</span>
+            <span>{{ detailRow.orderTitle }}</span>
+          </div>
         </div>
         <div class="detail-section">
           <div class="detail-row">
@@ -113,7 +119,7 @@
               <span class="detail-value">
                 <el-tag :type="detailRow.serviceType === 'NRTK' ? 'primary' : 'info'" size="mini">{{
                   detailRow.serviceType
-                }}</el-tag>
+                  }}</el-tag>
               </span>
             </div>
             <div class="detail-item">
@@ -226,8 +232,8 @@
           </el-form-item>
         </div>
         <div class="form-row">
-          <el-form-item prop="device" :label="$t('device_type')" class="form-col">
-            <el-input v-model="form.device" :placeholder="$t('placeholder_device')" />
+          <el-form-item prop="deviceType" :label="$t('device_type')" class="form-col">
+            <el-input v-model="form.deviceType" :placeholder="$t('placeholder_device')" />
           </el-form-item>
           <!-- <el-form-item prop="partner" :label="$t('partner_name')" class="form-col">
             <el-select v-model="form.partner" style="width: 100%">
@@ -235,8 +241,8 @@
             </el-select>
           </el-form-item> -->
         </div>
-        <el-form-item v-if="form.accountType === 'SDK'" prop="accountList" :label="$t('account_list')">
-          <el-input v-model="form.accountList" type="textarea" :rows="3" @input="onAccountListInput" />
+        <el-form-item v-if="form.accountType === 'SDK'" prop="accountsTxt" :label="$t('account_list')">
+          <el-input v-model="form.accountsTxt" type="textarea" :rows="3" @input="onAccountListInput" />
         </el-form-item>
         <el-form-item :label="$t('notes')">
           <el-input v-model="form.notes" :placeholder="$t('placeholder_notes')" />
@@ -244,7 +250,7 @@
       </el-form>
       <span slot="footer">
         <el-button type="primary" size="small" @click="handleSave">{{ $t('confirm') }}</el-button>
-        <el-button size="small" class="btn-reset" @click="modalVisible = false">{{ $t('cancel') }}</el-button>
+        <el-button size="small" class="btn-reset" @click="resetForm">{{ $t('cancel') }}</el-button>
       </span>
     </el-dialog>
   </div>
@@ -276,9 +282,9 @@ export default {
         specType: [{ required: true, message: this.$t('required'), trigger: 'change' }],
         specNumber: [{ required: true, message: this.$t('required'), trigger: 'change' }],
         quantity: [{ required: true, message: this.$t('required'), trigger: 'blur' }],
-        device: [{ required: true, message: this.$t('required'), trigger: 'blur' }],
+        deviceType: [{ required: true, message: this.$t('required'), trigger: 'blur' }],
         // partner: [{ required: true, message: this.$t('required'), trigger: 'change' }],
-        accountList: [
+        accountsTxt: [
           { required: true, message: this.$t('required'), trigger: 'blur' },
           { pattern: /^[a-zA-Z0-9,]+$/, message: this.$t('account_list_format'), trigger: 'blur' }
         ]
@@ -292,23 +298,6 @@ export default {
     }
   },
   computed: {
-    // filteredOrders() {
-    //   return DB.orders.filter(o => {
-    //     const matchTitle = !this.filters.title || o.title.toLowerCase().includes(this.filters.title.toLowerCase())
-    //     const matchOrderNo = !this.filters.orderNo || o.orderNo.toLowerCase().includes(this.filters.orderNo.toLowerCase())
-    //     const matchEnt = !this.filters.enterprise || o.enterprise.toLowerCase().includes(this.filters.enterprise.toLowerCase())
-    //     const matchPartner = !this.filters.partner || o.partner === this.filters.partner
-    //     const matchType = !this.filters.svcType || o.svcType === this.filters.svcType
-    //     const matchMode = !this.filters.acctMode || o.acctMode === this.filters.acctMode
-    //     const matchSpec = !this.filters.spec || o.spec === this.filters.spec
-    //     const matchStatus = !this.filters.status || o.status === this.filters.status
-    //     return matchTitle && matchOrderNo && matchEnt && matchPartner && matchType && matchMode && matchSpec && matchStatus
-    //   })
-    // },
-    // paginatedOrders() {
-    //   const start = (this.currentPage - 1) * this.pageSize
-    //   return this.filteredOrders.slice(start, start + this.pageSize)
-    // }
   },
   mounted() {
     this.getList()
@@ -316,13 +305,16 @@ export default {
   },
   methods: {
     emptyForm() {
-      return { id: null, companyCode: '', orderTitle: '', serviceType: 'NRTK', accountType: 'Ntrip', specType: 1, specNumber: 1, quantity: 1, device: '', accountList: '', notes: '' }
+      return { id: null, companyCode: '', orderTitle: '', serviceType: 'NRTK', accountType: 'Ntrip', specType: 1, specNumber: 1, quantity: 1, deviceType: '', accountsTxt: '', notes: '' }
     },
     openOrderModal(row) {
       this.form = row ? { ...row, id: row.orderNo } : this.emptyForm()
       this.onSvcTypeChange()
       this.onSpecChange()
       this.modalVisible = true
+      this.$nextTick(() => {
+        this.$refs.orderForm && this.$refs.orderForm.clearValidate()
+      })
     },
     onSvcTypeChange() {
       if (this.form.svcType === 'PPP-RTK') {
@@ -409,6 +401,10 @@ export default {
       this.currentPage = 1
       this.getList()
 
+    },
+    resetForm() {
+      this.$refs.orderForm && this.$refs.orderForm.clearValidate()
+      this.modalVisible = false
     },
     resetFilter() {
       this.filters = { orderTitle: '', orderNo: '', serviceType: '', companyCode: '', accountType: '', specType: '', status: '' },
@@ -498,19 +494,32 @@ export default {
 }
 
 .detail-header {
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 
   .detail-no {
     font-size: 12px;
     color: $blue-500;
     font-weight: 600;
     margin-bottom: 4px;
+
+    .detail-label {
+      color: $text-gray-500;
+      font-weight: 400;
+      margin-right: 6px;
+    }
   }
 
   .detail-title {
     font-size: 18px;
     font-weight: 700;
     color: #fff;
+
+    .detail-label {
+      font-size: 12px;
+      color: $text-gray-500;
+      font-weight: 400;
+      margin-right: 6px;
+    }
   }
 }
 

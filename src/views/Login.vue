@@ -39,6 +39,7 @@
 import { login } from '@/common/js/api'
 import { AESEncryptPassword } from '@/common/js/crypto.js'
 import { RES_SUCCESS } from '@/common/js/const.js'
+import { validatePasswordComplexity } from '@/common/js/utils.js'
 export default {
   name: 'LoginPage',
   data() {
@@ -65,19 +66,7 @@ export default {
   },
   methods: {
     validatePassword(rule, value, callback) {
-      if (!value) {
-        callback()
-        return
-      }
-      if (value.length < 8) {
-        callback(new Error(this.$t('password_min_length')))
-        return
-      }
-      if (!/[a-zA-Z]/.test(value) || !/[0-9]/.test(value)) {
-        callback(new Error(this.$t('password_format')))
-        return
-      }
-      callback()
+      validatePasswordComplexity(value, callback, this.$t)
     },
     handleLogin() {
       this.$refs.loginForm.validate(valid => {
@@ -97,7 +86,7 @@ export default {
             this.$message.error(res.message || this.$t('login_failed'))
           }
         }).catch(error => {
-          // this.$message.error(error.message || this.$t('login_failed'))
+          this.$message.error((error && error.message) || this.$t('login_failed'))
         })
       })
     }

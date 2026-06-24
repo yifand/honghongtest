@@ -104,6 +104,7 @@
 // import { DB, saveUser, deleteUser } from '@/data/dashboardDB'
 import { userInfoCreate, getUserInfoSearch, userInfoRemove, userInfoEdit, getPartnerSearch } from '@/common/js/api.js'
 import { RES_SUCCESS } from '@/common/js/const.js'
+import { validatePasswordComplexity } from '@/common/js/utils.js'
 export default {
   name: 'DashboardUsers',
   data() {
@@ -121,7 +122,10 @@ export default {
       rules: {
         companyCode: [{ required: true, message: this.$t('please_select_enterprise'), trigger: 'change' }],
         userCode: [{ required: true, message: this.$t('please_enter_account'), trigger: 'blur' }],
-        password: [{ required: true, message: this.$t('please_enter_password'), trigger: 'blur' }]
+        password: [
+          { required: true, message: this.$t('please_enter_password'), trigger: 'blur' },
+          { validator: (rule, value, callback) => validatePasswordComplexity(value, callback, this.$t), trigger: 'blur' }
+        ]
       }
     }
   },
@@ -139,6 +143,9 @@ export default {
     openUserModal(row) {
       this.form = row ? { ...row, id: row.userCode } : this.emptyForm()
       this.modalVisible = true
+      this.$nextTick(() => {
+        this.$refs.form && this.$refs.form.clearValidate()
+      })
     },
     getList() {
       this.tableLoading = true
