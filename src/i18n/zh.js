@@ -276,6 +276,7 @@ export default {
   partner_code: '合作伙伴代码',
   confirm_delete: '确认删除？',
   required: '此项为必填项',
+  account_list_format: '账号列表只能包含英文、数字和逗号',
   year_msg:'年',
   month_msg:'月',
   day_msg:'日',

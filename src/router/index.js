@@ -58,7 +58,7 @@ router.beforeEach((to, from, next) => {
       next()
     }
   } else if (to.matched.some(record => record.meta.guest) && isLoggedIn) {
-    next('/dashboard/overview')
+    next({ path: '/dashboard/overview', replace: true })
   } else {
     next()
   }

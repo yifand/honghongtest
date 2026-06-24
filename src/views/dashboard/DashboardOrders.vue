@@ -53,17 +53,17 @@
         <el-table-column prop="serviceType" :label="$t('service_type')" width="100">
           <template slot-scope="scope">
             <el-tag :type="scope.row.serviceType === 'NRTK' ? 'primary' : 'info'" size="mini">{{ scope.row.serviceType
-            }}</el-tag>
+              }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="accountType" :label="$t('account_mode')" />
         <el-table-column prop="spec" :label="$t('account_spec')">
           <template slot-scope="scope">{{ scope.row.specType | transText(pecttypes) }}/{{ scope.row.specNumber
-            }}</template>
+          }}</template>
         </el-table-column>
         <el-table-column prop="quantity" :label="$t('quantity')" width="70" />
         <el-table-column prop="device" :label="$t('device_type')" width="140" />
-        <el-table-column prop="accountList" :label="$t('account_list')" min-width="160" show-overflow-tooltip />
+        <el-table-column prop="accountsTxt" :label="$t('account_list')" min-width="160" show-overflow-tooltip />
         <el-table-column prop="orderTime" :label="$t('created_time')" width="110" />
         <el-table-column prop="status" :label="$t('status')" width="100">
           <template slot-scope="scope">
@@ -113,7 +113,7 @@
               <span class="detail-value">
                 <el-tag :type="detailRow.serviceType === 'NRTK' ? 'primary' : 'info'" size="mini">{{
                   detailRow.serviceType
-                  }}</el-tag>
+                }}</el-tag>
               </span>
             </div>
             <div class="detail-item">
@@ -235,8 +235,8 @@
             </el-select>
           </el-form-item> -->
         </div>
-        <el-form-item prop="accountList" :label="$t('account_list')">
-          <el-input v-model="form.accountList" type="textarea" :rows="3" />
+        <el-form-item v-if="form.accountType === 'SDK'" prop="accountList" :label="$t('account_list')">
+          <el-input v-model="form.accountList" type="textarea" :rows="3" @input="onAccountListInput" />
         </el-form-item>
         <el-form-item :label="$t('notes')">
           <el-input v-model="form.notes" :placeholder="$t('placeholder_notes')" />
@@ -278,7 +278,10 @@ export default {
         quantity: [{ required: true, message: this.$t('required'), trigger: 'blur' }],
         device: [{ required: true, message: this.$t('required'), trigger: 'blur' }],
         // partner: [{ required: true, message: this.$t('required'), trigger: 'change' }],
-        accountList: [{ required: true, message: this.$t('required'), trigger: 'blur' }]
+        accountList: [
+          { required: true, message: this.$t('required'), trigger: 'blur' },
+          { pattern: /^[a-zA-Z0-9,]+$/, message: this.$t('account_list_format'), trigger: 'blur' }
+        ]
       },
       modeOptions: ['Ntrip', 'SDK'],
       stackOptions: [1, 3, 5],
@@ -335,6 +338,9 @@ export default {
       if (!this.stackOptions.includes(this.form.specNumber)) {
         this.form.specNumber = this.stackOptions[0]
       }
+    },
+    onAccountListInput(value) {
+      this.form.accountList = (value || '').replace(/[^a-zA-Z0-9,]/g, '')
     },
     getList() {
       this.tableLoading = true

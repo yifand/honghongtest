@@ -22,13 +22,15 @@ export default {
       amap: null,
       currentMarker: null,
       pointsGroup: [],
-      polygonList: []
+      polygonList: [],
+      polygonpppRTKList: []
     }
   },
   watch: {
     pointsGroup(val) {
       if (val) {
         this.updateNtrpLayer()
+        this.updatepppRTKLayer()
       }
     }
   },
@@ -168,6 +170,25 @@ export default {
       if (this.polygonList.length) this.map.fitBounds(L.featureGroup(this.polygonList).getBounds());
 
     },
+    updatepppRTKLayer() {
+      // 移除旧面
+      this.polygonpppRTKList.forEach(poly => this.map.removeLayer(poly));
+      this.polygonpppRTKList = [];
+      this.pointsGroup.forEach(item => {
+        // 绘制多边形（封闭面）
+        const polygon = L.polygon(item, {
+          color: '#4ade80',     // 边框颜色
+          weight: 2,            // 边框粗细
+          opacity: 0.8,         // 边框透明度
+          fillColor: '#4ade80', // 填充颜色
+          fillOpacity: 0.2      // 填充透明度
+        }).addTo(this.map);
+        this.polygonpppRTKList.push(polygon);
+      })
+      // 所有面自适应铺满视口
+      if (this.polygonpppRTKList.length) this.map.fitBounds(L.featureGroup(this.polygonpppRTKList).getBounds());
+
+    },
     toggleLayer(layer, checked) {
       if (!this.map) return
       if (layer === 'nrtk') {
@@ -181,7 +202,16 @@ export default {
           })
         }
       } else if (layer === 'ppp-rtk') {
-        checked ? this.map.addLayer(this.pppRTKLayer) : this.map.removeLayer(this.pppRTKLayer)
+        if (checked) {
+          this.polygonpppRTKList.forEach(p => {
+            if (!this.map.hasLayer(p)) p.addTo(this.map);
+          })
+        } else {
+          this.polygonpppRTKList.forEach(p => {
+            if (this.map.hasLayer(p)) this.map.removeLayer(p);
+          })
+        }
+        // checked ? this.map.addLayer(this.pppRTKLayer) : this.map.removeLayer(this.pppRTKLayer)
       }
     },
     isInChina(lng, lat) {

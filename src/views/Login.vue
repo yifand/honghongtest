@@ -88,10 +88,7 @@ export default {
           username: this.form.username,
           password: AESEncryptPassword(this.form.password)
         }).then(res => {
-          console.log({ res });
-
-          if ((res.code === RES_SUCCESS || res.code === '200' || res.status === 200) &&
-            res.result === '1000_001') {
+          if (res.code === RES_SUCCESS) {
             this.$store.commit('SET_USERNAME', this.form.username)
             const redirect = this.$route.query.redirect || '/dashboard/overview'
             this.$router.push(redirect)

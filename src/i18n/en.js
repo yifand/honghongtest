@@ -276,6 +276,7 @@ export default {
   partner_code: 'Partner Code',
   confirm_delete: 'Confirm delete?',
   required: 'This field is required',
+  account_list_format: 'Account list can only contain letters, numbers and commas',
   year_msg:'year',
   month_msg:'month',
   day_msg:'day',
