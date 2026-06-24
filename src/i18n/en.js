@@ -113,6 +113,8 @@ export default {
   dms: 'D/M/S',
   enter_valid_coords: 'Please enter valid coordinates',
   coords_out_of_range: 'Longitude must be between -180 and 180, Latitude must be between -90 and 90',
+  dms_placeholder: 'e.g. 116°23′42″E',
+  enter_valid_dms: 'Please enter a valid D/M/S coordinate',
   enter_location: 'Please enter a location keyword',
   location_not_found: 'Location not found',
   detail: 'Detail',

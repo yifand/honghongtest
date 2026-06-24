@@ -31,6 +31,9 @@ export default {
       if (val) {
         this.updateNtrpLayer()
         this.updatepppRTKLayer()
+        this.polygonpppRTKList.forEach(p => {
+          if (this.map.hasLayer(p)) this.map.removeLayer(p);
+        })
       }
     }
   },
@@ -60,8 +63,10 @@ export default {
         maxZoom: 18,
         noWrap: true,     // 禁止世界左右重复/
         maxBounds: L.latLngBounds(L.latLng(-85, -180), L.latLng(85, 180)),
-        maxBoundsViscosity: 1.0
+        maxBoundsViscosity: 1.0,
+        zoomControl: false
       });
+      L.control.zoom({ position: 'topright' }).addTo(this.map);
 
       // 2. 备用底图（zoom 0–2 用，能显示完整世界）
       this.osm = L.tileLayer(`https://t0.tianditu.gov.cn/vec_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=vec&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=${config.token}`, {
@@ -249,6 +254,19 @@ export default {
         this.searchMarker.bindPopup(`<b>${lat}, ${lng}</b>`).openPopup()
         // Pan and zoom to location
         this.map.setView([lat, lng], zoom)
+      }
+    },
+    setCoverageMarker(lat, lng, info) {
+      if (this.map) {
+        if (this.searchMarker) {
+          this.map.removeLayer(this.searchMarker)
+        }
+        const content = info !== undefined
+          ? `<b>${lat}, ${lng}</b><br/><pre style="color:${info.result ? '#22c55e' : '#ef4444'};font-weight:600;">${info.result ? "在服务范围" : "不在服务范围"}</pre>`
+          : `<b>${lat}, ${lng}</b>`
+        this.searchMarker = L.marker([lat, lng]).addTo(this.map)
+        this.searchMarker.bindPopup(content).openPopup()
+        this.map.setView([lat, lng], 10)
       }
     },
     async searchPlace(keyword) {

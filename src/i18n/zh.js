@@ -113,6 +113,8 @@ export default {
   dms: 'D/M/S',
   enter_valid_coords: '请输入有效的坐标',
   coords_out_of_range: '经度范围 -180~180，纬度范围 -90~90',
+  dms_placeholder: '例如 116°23′42″E',
+  enter_valid_dms: '请输入有效的度分秒格式',
   enter_location: '请输入位置关键词',
   location_not_found: '未找到该位置',
   detail: '详情',

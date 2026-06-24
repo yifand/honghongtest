@@ -124,6 +124,7 @@ export default {
       pecttypes: PECTYPEENUM,
       partnerOptions: [],
       dataList: [],
+      orderNo: null,
       rules: {
         pwd: [
           { required: true, message: this.$t('please_enter_new_password'), trigger: 'blur' },
@@ -137,13 +138,33 @@ export default {
   },
   mounted() {
     this.getPartnerList()
-    this.getNtripAccountSearch()
+    const orderNoQuery = this.$route.query.orderNo
+    if (orderNoQuery) {
+      this.orderNo = decodeURIComponent(orderNoQuery)
+      this.getNtripAccountListByOrderNo()
+    } else {
+      this.getNtripAccountSearch()
+    }
   },
   methods: {
     getNtripAccountSearch() {
       this.tableLoading = true
       const params = { ...this.filters, pageNum: this.currentPage, pageSize: this.pageSize }
       ntripAccountSearch(params).then(res => {
+        if (res.code === RES_SUCCESS || res.code === 200) {
+          this.dataList = res.result.records
+          this.total = res.result.total
+        } else {
+          this.$message.warning(res.message)
+        }
+      }).finally(() => {
+        this.tableLoading = false
+      })
+    },
+    getNtripAccountListByOrderNo() {
+      this.tableLoading = true
+      const params = { ...this.filters, orderNo: this.orderNo, pageNum: this.currentPage, pageSize: this.pageSize }
+      ntripAccountListByOrderNo(params).then(res => {
         if (res.code === RES_SUCCESS || res.code === 200) {
           this.dataList = res.result.records
           this.total = res.result.total

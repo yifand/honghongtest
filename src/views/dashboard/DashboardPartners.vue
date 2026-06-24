@@ -24,11 +24,13 @@
         </el-table-column>
         <el-table-column prop="enterprise" :label="$t('enterprise_name')" />
         <el-table-column prop="note" :label="$t('notes')" />
-        <el-table-column :label="$t('actions')" width="140" fixed="right">
+        <el-table-column :label="$t('actions')" width="200" fixed="right">
           <template slot-scope="scope">
             <el-button type="text" size="mini" @click="openPartnerModal(scope.row, true)">{{ $t('detail') }}</el-button>
             <el-button type="text" size="mini" class="text-green" @click="openPartnerModal(scope.row, false)">{{
               $t('edit') }}</el-button>
+            <el-button type="text" size="mini" class="text-red" @click="handleDelete(scope.row)">{{ $t('delete')
+              }}</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -58,21 +60,19 @@
         <el-button v-if="!modalReadonly" type="primary" size="small" @click="handleSave">{{ $t('confirm') }}</el-button>
         <el-button size="small" class="btn-reset" @click="modalVisible = false">{{ modalReadonly ? $t('ok') :
           $t('cancel')
-        }}</el-button>
+          }}</el-button>
       </span>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import { DB, savePartner, deletePartner } from '@/data/dashboardDB'
-import { partnerCreate, getPartnerSearch, partnerDetail, partnerEdit } from '@/common/js/api.js'
+import { partnerCreate, getPartnerSearch, partnerDetail, partnerRemove, partnerEdit } from '@/common/js/api.js'
 import { RES_SUCCESS } from '@/common/js/const.js'
 export default {
   name: 'DashboardPartners',
   data() {
     return {
-      DB,
       filters: { companyName: '' },
       dataList: [],
       pageNum: 1,
@@ -97,15 +97,6 @@ export default {
       if (this.modalReadonly) return this.$t('partner_detail_title')
       return this.form.id ? this.$t('edit_partner') : this.$t('add_partner')
     },
-    // filteredPartners() {
-    //   return DB.partners.filter(p => {
-    //     return !this.filters.name || p.name.toLowerCase().includes(this.filters.name.toLowerCase())
-    //   })
-    // },
-    // paginatedPartners() {
-    //   const start = (this.pageNum - 1) * this.pageSize
-    //   return this.filteredPartners.slice(start, start + this.pageSize)
-    // }
   },
   mounted() {
     this.getList()
@@ -152,9 +143,16 @@ export default {
     resetForm() {
       this.$refs.partnerForm && this.$refs.partnerForm.clearValidate()
     },
-    handleDelete(id) {
-      this.$confirm(this.$t('confirm_delete') + ' ID: ' + id, '', { type: 'warning' }).then(() => {
-        deletePartner(id)
+    handleDelete(row) {
+      this.$confirm(this.$t('confirm_delete') + '：' + row.companyName, '', { type: 'warning' }).then(() => {
+        partnerRemove({ companyCode: row.companyCode }).then(res => {
+          if (res.code === RES_SUCCESS || res.code === 200) {
+            this.$message.success(this.$t('delete_success'))
+            this.getList()
+          } else {
+            this.$message.warning(res.message)
+          }
+        })
       }).catch(() => { })
     },
     handleSizeChange(size) {

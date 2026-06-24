@@ -67,6 +67,7 @@ const apiPath_AdjustCodeList = `${PATH_APISERVICE}/geo/adjustCodeList`
 export const apiPath_GeoAdjust = `${PATH_ROOT}/geo/adjust`
 const apiPath_Geo_CodeList = `${PATH_APISERVICE}/geo/codeList`
 const apiPath_Geo_getAreaList = `${PATH_APISERVICE}/geo/getAreaList`
+const apiPath_Coverage = `${PATH_APISERVICE}/hap/coverage`
 // AI助手
 export const apiPathQAChat = `${PATH_ROOT}/llm/question`
 
@@ -75,6 +76,7 @@ const apiPathPartnerCreate = `${PATH_APISERVICE}/partner/create`
 const apiPathPartnerDetail = `${PATH_APISERVICE}/partner/detail`
 const apiPathPartnerSearch = `${PATH_APISERVICE}/partner/search`
 const apiPathPartnerEdit = `${PATH_APISERVICE}/partner/edit`
+const apiPathPartnerRemove = `${PATH_APISERVICE}/partner/remove`
 
 //用户管理
 const apiPathUserInfoCreate= `${PATH_APISERVICE}/userInfo/create`
@@ -150,6 +152,9 @@ export function partnerDetail (params) {
 
 export function partnerEdit (params) {
   return _postData(apiPathPartnerEdit,params)
+}
+export function partnerRemove (params) {
+  return _getData(apiPathPartnerRemove,params)
 }
 
 export function genCodeList () {
@@ -298,4 +303,8 @@ export function geo_CodeList () {
 
 export function geo_getAreaList (params) {
   return _getData(apiPath_Geo_getAreaList, params,true)
+}
+
+export function getCoverage (params) {
+  return _getData(apiPath_Coverage, params)
 }

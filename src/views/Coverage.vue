@@ -25,12 +25,12 @@
             <div v-if="searchMode === 'coord'" class="format-toggle">
               <el-button :class="['format-btn', { active: coordFormat === 'deg' }]" size="mini"
                 @click="coordFormat = 'deg'">{{ $t('degrees') }}</el-button>
-              <el-button :class="['format-btn', { active: coordFormat === 'dms' }]" size="mini"
-                @click="coordFormat = 'dms'">{{ $t('dms') }}</el-button>
+              <!-- <el-button :class="['format-btn', { active: coordFormat === 'dms' }]" size="mini"
+                @click="coordFormat = 'dms'">{{ $t('dms') }}</el-button> -->
             </div>
 
-            <!-- Coordinate Inputs -->
-            <div v-if="searchMode === 'coord'" class="input-group">
+            <!-- Coordinate Inputs (Decimal Degrees) -->
+            <div v-if="searchMode === 'coord' && coordFormat === 'deg'" class="input-group">
               <div class="input-item">
                 <label>{{ $t('longitude') }}</label>
                 <el-input v-model="longitude" size="small" :placeholder="$t('longitude_placeholder')" />
@@ -38,6 +38,18 @@
               <div class="input-item">
                 <label>{{ $t('latitude') }}</label>
                 <el-input v-model="latitude" size="small" :placeholder="$t('latitude_placeholder')" />
+              </div>
+            </div>
+
+            <!-- Coordinate Inputs (DMS) -->
+            <div v-if="searchMode === 'coord' && coordFormat === 'dms'" class="input-group">
+              <div class="input-item">
+                <label>{{ $t('longitude') }}</label>
+                <el-input v-model="longitudeDms" size="small" :placeholder="$t('dms_placeholder')" />
+              </div>
+              <div class="input-item">
+                <label>{{ $t('latitude') }}</label>
+                <el-input v-model="latitudeDms" size="small" :placeholder="$t('dms_placeholder')" />
               </div>
             </div>
 
@@ -100,6 +112,7 @@
 
 <script>
 import CoverageMap from '@/components/CoverageMap.vue'
+import { getCoverage } from '@/common/js/api'
 
 export default {
   name: 'CoveragePage',
@@ -112,25 +125,62 @@ export default {
       coordFormat: 'deg',
       longitude: '',
       latitude: '',
+      longitudeDms: '',
+      latitudeDms: '',
       locationKeyword: '',
       showNRTK: true,
       showPPPRTK: false
     }
   },
+  watch: {
+    coordFormat(newVal) {
+      if (newVal === 'deg') {
+        if (this.longitudeDms || this.latitudeDms) {
+          const lng = this.dmsToDecimal(this.longitudeDms)
+          const lat = this.dmsToDecimal(this.latitudeDms)
+          this.longitude = !isNaN(lng) ? lng.toFixed(6) : ''
+          this.latitude = !isNaN(lat) ? lat.toFixed(6) : ''
+        }
+      } else {
+        if (this.longitude || this.latitude) {
+          const lng = parseFloat(this.longitude)
+          const lat = parseFloat(this.latitude)
+          this.longitudeDms = !isNaN(lng) ? this.decimalToDms(lng, true) : ''
+          this.latitudeDms = !isNaN(lat) ? this.decimalToDms(lat, false) : ''
+        }
+      }
+    }
+  },
   methods: {
-    handleSearch() {
+    async handleSearch() {
       if (this.searchMode === 'coord') {
-        const lng = parseFloat(this.longitude)
-        const lat = parseFloat(this.latitude)
-        if (isNaN(lat) || isNaN(lng)) {
-          this.$message.warning(this.$t('enter_valid_coords'))
-          return
+        let lng, lat
+        if (this.coordFormat === 'dms') {
+          lng = this.dmsToDecimal(this.longitudeDms)
+          lat = this.dmsToDecimal(this.latitudeDms)
+          if (isNaN(lng) || isNaN(lat)) {
+            this.$message.warning(this.$t('enter_valid_dms'))
+            return
+          }
+        } else {
+          lng = parseFloat(this.longitude)
+          lat = parseFloat(this.latitude)
+          if (isNaN(lat) || isNaN(lng)) {
+            this.$message.warning(this.$t('enter_valid_coords'))
+            return
+          }
         }
         if (lng < -180 || lng > 180 || lat < -90 || lat > 90) {
           this.$message.warning(this.$t('coords_out_of_range'))
           return
         }
-        this.$refs.coverageMap.setView(lat, lng)
+        try {
+          const res = await getCoverage({ lat, lon: lng })
+          this.$refs.coverageMap.setCoverageMarker(lat, lng, res)
+        } catch (err) {
+          this.$message.error(this.$t('req_failed'))
+          console.error(err)
+        }
       } else if (this.searchMode === 'keyword') {
         const keyword = this.locationKeyword.trim()
         if (!keyword) {
@@ -147,6 +197,44 @@ export default {
       if (this.$refs.coverageMap) {
         this.$refs.coverageMap.toggleLayer(layer, checked)
       }
+    },
+    dmsToDecimal(value) {
+      if (value === null || value === undefined || String(value).trim() === '') return NaN
+      const text = String(value).trim().replace(/°|′|'|″|"/g, ' ').replace(/\s+/g, ' ')
+      const parts = text.split(' ').filter(p => p !== '')
+      if (parts.length === 0) return NaN
+
+      let negative = false
+      let first = parts[0]
+      if (first.startsWith('-')) {
+        negative = true
+        first = first.replace('-', '')
+        parts[0] = first
+      } else if (first.endsWith('W') || first.endsWith('w') || first.endsWith('S') || first.endsWith('s')) {
+        negative = true
+        parts[0] = first.slice(0, -1)
+      } else if (first.endsWith('E') || first.endsWith('e') || first.endsWith('N') || first.endsWith('n')) {
+        parts[0] = first.slice(0, -1)
+      }
+
+      const deg = parseFloat(parts[0])
+      const min = parts.length > 1 ? parseFloat(parts[1]) : 0
+      const sec = parts.length > 2 ? parseFloat(parts[2]) : 0
+      if (isNaN(deg) || isNaN(min) || isNaN(sec)) return NaN
+      if (min < 0 || min >= 60 || sec < 0 || sec >= 60) return NaN
+
+      let decimal = Math.abs(deg) + min / 60 + sec / 3600
+      return negative ? -decimal : decimal
+    },
+    decimalToDms(value, isLongitude) {
+      const negative = value < 0
+      const abs = Math.abs(value)
+      const deg = Math.floor(abs)
+      const minFloat = (abs - deg) * 60
+      const min = Math.floor(minFloat)
+      const sec = ((minFloat - min) * 60).toFixed(2)
+      const direction = isLongitude ? (negative ? 'W' : 'E') : (negative ? 'S' : 'N')
+      return `${deg}°${min}′${sec}″${direction}`
     }
   }
 }
@@ -327,7 +415,7 @@ export default {
 
   &.nrtk-tag {
     background: transparent;
-    // border: 1px solid rgba(249, 115, 22, 1);
+    // border: 1px solid rgba(249, 115, 18, 1);
   }
 
   &.ppp-tag {

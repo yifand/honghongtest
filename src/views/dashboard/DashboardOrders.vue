@@ -63,7 +63,12 @@
         </el-table-column>
         <el-table-column prop="quantity" :label="$t('quantity')" width="70" />
         <el-table-column prop="deviceType" :label="$t('device_type')" width="140" />
-        <el-table-column prop="accountsTxt" :label="$t('account_list')" min-width="160" show-overflow-tooltip />
+        <el-table-column prop="accountsTxt" :label="$t('account_list')" min-width="160" show-overflow-tooltip>
+          <template slot-scope="scope">
+            <el-button type="text" size="mini" class="text-blue" @click="goToAccounts(scope.row)">{{
+              scope.row.accountsTxt }}</el-button>
+          </template>
+        </el-table-column>
         <el-table-column prop="orderTime" :label="$t('created_time')" width="110" />
         <el-table-column prop="status" :label="$t('status')" width="100">
           <template slot-scope="scope">
@@ -227,7 +232,7 @@
               <el-option v-for="opt in stackOptions" :key="opt" :label="opt" :value="opt" />
             </el-select>
           </el-form-item>
-          <el-form-item prop="quantity" :label="$t('quantity')" class="form-col">
+          <el-form-item v-if="form.accountType !== 'SDK'" prop="quantity" :label="$t('quantity')" class="form-col">
             <el-input-number v-model="form.quantity" :min="1" :max="99" style="width: 100%" />
           </el-form-item>
         </div>
@@ -282,7 +287,7 @@ export default {
         specType: [{ required: true, message: this.$t('required'), trigger: 'change' }],
         specNumber: [{ required: true, message: this.$t('required'), trigger: 'change' }],
         quantity: [{ required: true, message: this.$t('required'), trigger: 'blur' }],
-        deviceType: [{ required: true, message: this.$t('required'), trigger: 'blur' }],
+        // deviceType: [{ required: true, message: this.$t('required'), trigger: 'blur' }],
         // partner: [{ required: true, message: this.$t('required'), trigger: 'change' }],
         accountsTxt: [
           { required: true, message: this.$t('required'), trigger: 'blur' },
@@ -385,6 +390,13 @@ export default {
     viewOrderDetail(row) {
       this.detailRow = row
       this.detailVisible = true
+    },
+    goToAccounts(row) {
+      if (!row.accountsTxt) return
+      this.$router.push({
+        path: '/dashboard/accounts',
+        query: { orderNo: encodeURIComponent(row.orderNo) }
+      })
     },
     handleSizeChange(size) {
       this.pageSize = size
