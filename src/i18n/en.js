@@ -7,8 +7,8 @@ export default {
   signin: 'Sign In',
   register: 'Register',
   home_subtitle: '40+ Countries Covered',
-  home_title_prefix: 'Centimeter-Level Precision.',
-  home_title_highlight: 'Global Reach.',
+  home_title_prefix: 'Centimeter-Level Precision',
+  home_title_highlight: 'Global Reach',
   home_desc: 'Industry-leading NRTK and PPP-RTK positioning services for autonomous vehicles, precision agriculture, and drone navigation.',
   get_sdk: 'Get SDK',
   view_coverage: 'View Coverage',
@@ -201,6 +201,7 @@ export default {
   search_placeholder: 'Enter city or region',
   // Dashboard
   role_admin: 'Administrator',
+  role_user: 'User',
   logout: 'Logout',
   my_account: 'My Account',
   dash_overview: 'Overview',

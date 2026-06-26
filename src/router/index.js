@@ -28,12 +28,12 @@ const routes = [
     redirect: '/dashboard/overview',
     meta: { requiresAuth: true },
     children: [
-      { path: 'overview', name: 'DashboardOverview', component: DashboardOverview, meta: { requiresAuth: true } },
-      { path: 'users', name: 'DashboardUsers', component: DashboardUsers, meta: { requiresAuth: true } },
-      { path: 'orders', name: 'DashboardOrders', component: DashboardOrders, meta: { requiresAuth: true } },
+      { path: 'overview', name: 'DashboardOverview', component: DashboardOverview, meta: { requiresAuth: true, admin: true } },
+      { path: 'users', name: 'DashboardUsers', component: DashboardUsers, meta: { requiresAuth: true, admin: true } },
+      { path: 'orders', name: 'DashboardOrders', component: DashboardOrders, meta: { requiresAuth: true, admin: true } },
       { path: 'accounts', name: 'DashboardAccounts', component: DashboardAccounts, meta: { requiresAuth: true } },
-      { path: 'partners', name: 'DashboardPartners', component: DashboardPartners, meta: { requiresAuth: true } },
-      { path: 'billing', name: 'DashboardBilling', component: DashboardBilling, meta: { requiresAuth: true } }
+      { path: 'partners', name: 'DashboardPartners', component: DashboardPartners, meta: { requiresAuth: true, admin: true } },
+      { path: 'billing', name: 'DashboardBilling', component: DashboardBilling, meta: { requiresAuth: true, admin: true } }
     ]
   },
   { path: '/knowledge', name: 'Knowledge', component: Knowledge },
@@ -50,25 +50,25 @@ const router = new VueRouter({
 
 router.beforeEach((to, from, next) => {
   const isLoggedIn = store.state.isLoggedIn
-  console.log({isLoggedIn},store.state);
-  
+  const role = store.state.role || []
+  const isAdmin = role.includes('9')
+
   if (to.matched.some(record => record.meta.requiresAuth)) {
     if (!isLoggedIn) {
-      console.log(11);
-      
       next({ path: '/login', query: { redirect: to.fullPath } })
-    } else {
-      console.log(222);
-      
-      next()
+      return
     }
+
+    if (to.matched.some(record => record.meta.admin) && !isAdmin) {
+      next({ path: '/dashboard/accounts', replace: true })
+      return
+    }
+
+    next()
   } else if (to.matched.some(record => record.meta.guest) && isLoggedIn) {
-    console.log(333);
-    
-    next({ path: '/dashboard/overview', replace: true })
+    const target = isAdmin ? '/dashboard/overview' : '/dashboard/accounts'
+    next({ path: target, replace: true })
   } else {
-    console.log(444);
-    
     next()
   }
 })

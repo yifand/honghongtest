@@ -6,13 +6,14 @@ Vue.use(Vuex)
 const savedLang = localStorage.getItem('app_lang') || 'en'
 const savedToken = localStorage.getItem('token') || ''
 const savedUserName = localStorage.getItem('userName') || ''
+const savedRole = localStorage.getItem('role') || ''
 
 export default new Vuex.Store({
   state: {
     lang: savedLang,
     isLoggedIn: !!savedToken,
     token: savedToken,
-    role:0,
+    role: savedRole ? savedRole.split(',').map(r => r.trim()).filter(r => r) : [],
     authoritys:'',
     userName: savedUserName
   },
@@ -26,6 +27,11 @@ export default new Vuex.Store({
     },
     SET_ROLE(state, role) {
       state.role = role
+      if (role && role.length) {
+        localStorage.setItem('role', role.join(','))
+      } else {
+        localStorage.removeItem('role')
+      }
     },
     SET_USERNAME(state, userName) {
       state.userName = userName
@@ -59,7 +65,7 @@ export default new Vuex.Store({
     logout({ commit }) {
       commit('SET_TOKEN', '')
       commit('SET_LOGIN', false)
-      commit('SET_ROLE', 0)
+      commit('SET_ROLE', [])
       commit('SET_AUTHORITYS', '')
       commit('SET_USERNAME', '')
 

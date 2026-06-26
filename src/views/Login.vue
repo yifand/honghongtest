@@ -79,7 +79,9 @@ export default {
         }).then(res => {
           if (res.code === RES_SUCCESS) {
             this.$store.commit('SET_USERNAME', this.form.username)
-            const redirect = this.$route.query.redirect || '/dashboard/overview'
+            const isAdmin = this.$store.state.role && this.$store.state.role.includes('9')
+            const defaultPath = isAdmin ? '/dashboard/overview' : '/dashboard/accounts'
+            const redirect = this.$route.query.redirect || defaultPath
             this.$router.push(redirect)
             this.$message.success(this.$t('login_success'))
           } else {

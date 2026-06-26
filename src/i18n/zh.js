@@ -7,8 +7,8 @@ export default {
   signin: '登录',
   register: '注册',
   home_subtitle: '覆盖 40+ 国家',
-  home_title_prefix: '厘米级精度，',
-  home_title_highlight: '全球覆盖。',
+  home_title_prefix: '厘米级精度',
+  home_title_highlight: '全球覆盖',
   home_desc: '行业领先的 NRTK 和 PPP-RTK 定位服务，适用于自动驾驶、精准农业和无人机导航。',
   get_sdk: '获取 SDK',
   view_coverage: '查看覆盖范围',
@@ -201,6 +201,7 @@ export default {
   search_placeholder: '输入城市或区域',
   // Dashboard
   role_admin: '管理员',
+  role_user: '普通用户',
   logout: '退出登录',
   my_account: '我的账户',
   dash_overview: '概览',
