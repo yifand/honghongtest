@@ -53,13 +53,13 @@
         <el-table-column prop="serviceType" :label="$t('service_type')" width="100">
           <template slot-scope="scope">
             <el-tag :type="scope.row.serviceType === 'NRTK' ? 'primary' : 'info'" size="mini">{{ scope.row.serviceType
-            }}</el-tag>
+              }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="accountType" :label="$t('account_mode')" />
         <el-table-column prop="spec" :label="$t('account_spec')">
           <template slot-scope="scope">{{ scope.row.specType | transText(pecttypes) }}/{{ scope.row.specNumber
-            }}</template>
+          }}</template>
         </el-table-column>
         <el-table-column prop="quantity" :label="$t('quantity')" width="70" />
         <el-table-column prop="deviceType" :label="$t('device_type')" width="140" />
@@ -110,7 +110,7 @@
         <div class="detail-section">
           <div class="detail-row">
             <div class="detail-item">
-              <span class="detail-label">{{ $t('order_enterprise_label') }}</span>
+              <span class="detail-label">{{ $t('enterprise_name') }}</span>
               <span class="detail-value">{{ detailRow.companyName }}</span>
             </div>
             <!-- <div class="detail-item">
@@ -120,15 +120,15 @@
           </div>
           <div class="detail-row">
             <div class="detail-item">
-              <span class="detail-label">{{ $t('order_service_label') }}</span>
+              <span class="detail-label">{{ $t('service_type') }}</span>
               <span class="detail-value">
                 <el-tag :type="detailRow.serviceType === 'NRTK' ? 'primary' : 'info'" size="mini">{{
                   detailRow.serviceType
-                  }}</el-tag>
+                }}</el-tag>
               </span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">{{ $t('order_mode_label') }}</span>
+              <span class="detail-label">{{ $t('account_mode') }}</span>
               <span class="detail-value">{{ detailRow.accountType }}</span>
             </div>
           </div>
@@ -143,11 +143,11 @@
         <div class="detail-section">
           <div class="detail-row three">
             <div class="detail-item">
-              <span class="detail-label">{{ $t('order_spec_label') }}</span>
+              <span class="detail-label">{{ $t('account_spec') }}</span>
               <span class="detail-value">{{ detailRow.specType | transText(pecttypes) }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">{{ $t('order_stack_label') }}</span>
+              <span class="detail-label">{{ $t('stack_qty') }}</span>
               <span class="detail-value">{{ detailRow.specNumber }}</span>
             </div>
             <div class="detail-item">
@@ -157,7 +157,7 @@
           </div>
           <div class="detail-row">
             <div class="detail-item">
-              <span class="detail-label">{{ $t('order_device_label') }}</span>
+              <span class="detail-label">{{ $t('device_type') }}</span>
               <span class="detail-value">{{ detailRow.device || '-' }}</span>
             </div>
           </div>
@@ -166,7 +166,7 @@
         <div class="detail-section">
           <div class="detail-row">
             <div class="detail-item full">
-              <span class="detail-label">{{ $t('order_accounts_label') }}</span>
+              <span class="detail-label">{{ $t('account_list') }}</span>
               <span class="detail-value">{{ detailRow.accountList || '-' }}</span>
             </div>
           </div>

@@ -136,7 +136,7 @@ export function getUserInfoSearch (params) {
   return _postData(apiPathUserInfoSearch,params)
 }
 export function userInfoEdit (params) {
-  return _getData(apiPathUserInfoEdit,params)
+  return _postData(apiPathUserInfoEdit,params)
 }
 export function userInfoRemove (params) {
   return _getData(apiPathUserInfoRemove,params)

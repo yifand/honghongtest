@@ -104,7 +104,7 @@
 // import { DB, saveUser, deleteUser } from '@/data/dashboardDB'
 import { userInfoCreate, getUserInfoSearch, userInfoRemove, userInfoEdit, getPartnerSearch } from '@/common/js/api.js'
 import { RES_SUCCESS } from '@/common/js/const.js'
-import { validatePasswordComplexity } from '@/common/js/utils.js'
+import { validatePasswordComplexity, validateAccountNoChineseAndSpace } from '@/common/js/utils.js'
 export default {
   name: 'DashboardUsers',
   data() {
@@ -121,7 +121,10 @@ export default {
       tableLoading: false,
       rules: {
         companyCode: [{ required: true, message: this.$t('please_select_enterprise'), trigger: 'change' }],
-        userCode: [{ required: true, message: this.$t('please_enter_account'), trigger: 'blur' }],
+        userCode: [
+          { required: true, message: this.$t('please_enter_account'), trigger: 'blur' },
+          { validator: (rule, value, callback) => validateAccountNoChineseAndSpace(value, callback), trigger: 'blur' }
+        ],
         password: [
           { required: true, message: this.$t('please_enter_password'), trigger: 'blur' },
           { validator: (rule, value, callback) => validatePasswordComplexity(value, callback, this.$t), trigger: 'blur' }

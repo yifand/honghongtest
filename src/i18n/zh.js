@@ -94,6 +94,8 @@ export default {
   not_found_desc: '您访问的页面可能已被移除或地址输入有误',
   username_required: '请输入用户名',
   password_required: '请输入密码',
+  no_chinese: '不能输入中文',
+  no_space: '不能输入空格',
   password_min_length: '密码长度至少为8位',
   password_format: '密码必须同时包含字母和数字',
   login_success: '登录成功',

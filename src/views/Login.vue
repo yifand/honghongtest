@@ -37,9 +37,14 @@
 
 <script>
 import { login } from '@/common/js/api'
-import { AESEncryptPassword } from '@/common/js/crypto.js'
+import { AESEncryptPassword, Encrypt, Decrypt } from '@/common/js/crypto.js'
 import { RES_SUCCESS } from '@/common/js/const.js'
-import { validatePasswordComplexity } from '@/common/js/utils.js'
+import { validatePasswordComplexity, validateAccountNoChineseAndSpace } from '@/common/js/utils.js'
+
+const REMEMBER_KEY = 'login_remember'
+const USERNAME_KEY = 'login_username'
+const PASSWORD_KEY = 'login_password'
+
 export default {
   name: 'LoginPage',
   data() {
@@ -55,7 +60,8 @@ export default {
     rules() {
       return {
         username: [
-          { required: true, message: this.$t('username_required'), trigger: 'blur' }
+          { required: true, message: this.$t('username_required'), trigger: 'blur' },
+          { validator: (rule, value, callback) => validateAccountNoChineseAndSpace(value, callback), trigger: 'blur' }
         ],
         password: [
           { required: true, message: this.$t('password_required'), trigger: 'blur' },
@@ -64,9 +70,43 @@ export default {
       }
     }
   },
+  created() {
+    this.loadRememberedCredentials()
+  },
   methods: {
     validatePassword(rule, value, callback) {
       validatePasswordComplexity(value, callback, this.$t)
+    },
+    loadRememberedCredentials() {
+      const remember = localStorage.getItem(REMEMBER_KEY) === 'true'
+      if (!remember) return
+      const username = localStorage.getItem(USERNAME_KEY)
+      const encryptedPassword = localStorage.getItem(PASSWORD_KEY)
+      if (username) {
+        this.form.username = username
+      }
+      if (encryptedPassword) {
+        try {
+          this.form.password = Decrypt(encryptedPassword)
+        } catch (e) {
+          this.clearRememberedCredentials()
+        }
+      }
+      this.form.remember = true
+    },
+    saveRememberedCredentials() {
+      if (this.form.remember) {
+        localStorage.setItem(REMEMBER_KEY, 'true')
+        localStorage.setItem(USERNAME_KEY, this.form.username)
+        localStorage.setItem(PASSWORD_KEY, Encrypt(this.form.password))
+      } else {
+        this.clearRememberedCredentials()
+      }
+    },
+    clearRememberedCredentials() {
+      localStorage.removeItem(REMEMBER_KEY)
+      localStorage.removeItem(USERNAME_KEY)
+      localStorage.removeItem(PASSWORD_KEY)
     },
     handleLogin() {
       this.$refs.loginForm.validate(valid => {
@@ -78,6 +118,7 @@ export default {
           password: AESEncryptPassword(this.form.password)
         }).then(res => {
           if (res.code === RES_SUCCESS) {
+            this.saveRememberedCredentials()
             this.$store.commit('SET_USERNAME', this.form.username)
             const isAdmin = this.$store.state.role && this.$store.state.role.includes('9')
             const defaultPath = isAdmin ? '/dashboard/overview' : '/dashboard/accounts'

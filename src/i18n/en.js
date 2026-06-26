@@ -94,6 +94,8 @@ export default {
   not_found_desc: 'The page you are looking for may have been removed or the address may be incorrect',
   username_required: 'Please enter username',
   password_required: 'Please enter password',
+  no_chinese: 'Chinese characters are not allowed',
+  no_space: 'Spaces are not allowed',
   password_min_length: 'Password must be at least 8 characters',
   password_format: 'Password must contain both letters and numbers',
   login_success: 'Login successful',
