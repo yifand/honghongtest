@@ -41,7 +41,7 @@
     </el-card>
     <el-card class="glass">
       <el-table v-loading="tableLoading" :data="dataList" size="small" class="dark-table">
-        <el-table-column type="index" width="50" />
+        <el-table-column type="index" :label="$t('serial_number')" width="60" />
         <el-table-column prop="companyName" :label="$t('enterprise_name')" />
         <!-- <el-table-column prop="partner" :label="$t('partner_name')" width="120" /> -->
         <el-table-column prop="orderTitle" :label="$t('order_title')" />
@@ -322,9 +322,9 @@ export default {
       })
     },
     onSvcTypeChange() {
-      if (this.form.svcType === 'PPP-RTK') {
+      if (this.form.serviceType === 'PPP-RTK') {
         this.modeOptions = ['SDK']
-        this.form.acctMode = 'SDK'
+        this.form.accountType = 'SDK'
       } else {
         this.modeOptions = ['Ntrip', 'SDK']
       }

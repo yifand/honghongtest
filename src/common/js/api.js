@@ -99,7 +99,11 @@ const apiPathNtripAccountDownload= `${PATH_APISERVICE}/ntripAccount/download`
 //知识库
  export const apiPathRagQuery= `${PATH_APISERVICE}/rag/query`
 
+const api_dashboard_overview= `${PATH_APISERVICE}/dashboard/overview`
 
+export function dashboard_overview () {
+  return _getData(api_dashboard_overview)
+}
 export function ntripAccountListByOrderNo (params) {
   return _postData(apiPathNtripAccountListByOrderNo, params)
 }

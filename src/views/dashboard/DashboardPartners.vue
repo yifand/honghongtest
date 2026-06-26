@@ -14,7 +14,7 @@
     </el-card>
     <el-card class="glass">
       <el-table v-loading="tableLoading" :data="dataList" size="small" class="dark-table">
-        <el-table-column type="index" width="50">
+        <el-table-column type="index" :label="$t('serial_number')" width="60">
         </el-table-column>
         <el-table-column prop="companyName" :label="$t('partner_name')" />
         <el-table-column prop="companyCode" :label="$t('partner_code')">
@@ -22,7 +22,6 @@
             <span class="text-xs">{{ scope.row.companyCode }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="enterprise" :label="$t('enterprise_name')" />
         <el-table-column prop="note" :label="$t('notes')" />
         <el-table-column :label="$t('actions')" width="200" fixed="right">
           <template slot-scope="scope">

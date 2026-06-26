@@ -74,6 +74,7 @@ export default {
   stations: '参考基站',
   uptime: '服务可用性',
   operations: '网络运营',
+  serial_number: '序号',
   welcome: '欢迎使用 GlobalService',
   signin_desc: '登录您的账户以访问我们的服务',
   username: '用户名',

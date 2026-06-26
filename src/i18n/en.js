@@ -74,6 +74,7 @@ export default {
   stations: 'Reference Stations',
   uptime: 'Uptime SLA',
   operations: 'Network Operations',
+  serial_number: 'No.',
   welcome: 'Welcome to GlobalService',
   signin_desc: 'Sign in to your account to access our services',
   username: 'Username',

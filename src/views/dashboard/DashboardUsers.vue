@@ -19,7 +19,7 @@
     </el-card>
     <el-card class="glass">
       <el-table v-loading="tableLoading" :data="dataList" size="small" class="dark-table">
-        <el-table-column type="index" width="50">
+        <el-table-column type="index" :label="$t('serial_number')" width="60">
         </el-table-column>
         <el-table-column prop="enterpriseName" :label="$t('enterprise_name')" />
         <el-table-column prop="userCode" :label="$t('login_account')">

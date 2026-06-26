@@ -36,7 +36,7 @@
     </el-card>
     <el-card class="glass">
       <el-table :data="dataList" v-loading="tableLoading" size="small" class="dark-table">
-        <el-table-column type="index" width="50" />
+        <el-table-column type="index" :label="$t('serial_number')" width="60" />
         <el-table-column prop="user" :label="$t('account_name')">
           <template slot-scope="scope">
             <span class="text-blue">{{ scope.row.user }}</span>
