@@ -1,3 +1,4 @@
+import i18n from '@/i18n'
 export function fixWaveLine(text) {
   // 将所有 ~ 替换为 \~ 转义符
   return text.replace(/~/g, '\\~')
@@ -15,11 +16,11 @@ export function validatePasswordComplexity(value, callback, t) {
     return
   }
   if (value.length < 8) {
-    callback(new Error(t('password_min_length')))
+    callback(new Error(i18n.t('password_min_length')))
     return
   }
   if (!/[a-zA-Z]/.test(value) || !/[0-9]/.test(value)) {
-    callback(new Error(t('password_format')))
+    callback(new Error(i18n.t('password_format')))
     return
   }
   callback()
