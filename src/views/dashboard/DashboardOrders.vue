@@ -270,7 +270,7 @@ export default {
   name: 'DashboardOrders',
   data() {
     return {
-      filters: { orderTitle: '', orderNo: '', serviceType: '', companyCode: '', accountType: '', specType: '', status: '' },
+      filters: { orderTitle: '', orderNo: '', serviceType: '', companyCode: '', accountType: '', specType: 3, status: '' },
       currentPage: 1,
       pageSize: 10,
       modalVisible: false,
@@ -310,7 +310,7 @@ export default {
   },
   methods: {
     emptyForm() {
-      return { id: null, companyCode: '', orderTitle: '', serviceType: 'NRTK', accountType: 'Ntrip', specType: 1, specNumber: 1, quantity: 1, deviceType: '', accountsTxt: '', notes: '' }
+      return { id: null, companyCode: '', orderTitle: '', serviceType: 'NRTK', accountType: 'Ntrip', specType: 3, specNumber: 1, quantity: 1, deviceType: '', accountsTxt: '', notes: '' }
     },
     openOrderModal(row) {
       this.form = row ? { ...row, id: row.orderNo } : this.emptyForm()
@@ -419,7 +419,7 @@ export default {
       this.modalVisible = false
     },
     resetFilter() {
-      this.filters = { orderTitle: '', orderNo: '', serviceType: '', companyCode: '', accountType: '', specType: '', status: '' },
+      this.filters = { orderTitle: '', orderNo: '', serviceType: '', companyCode: '', accountType: '', specType: 3, status: '' },
         this.currentPage = 1
       this.getList()
     }

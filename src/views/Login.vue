@@ -19,7 +19,7 @@
           </el-form-item>
           <el-form-item prop="password">
             <el-input v-model="form.password" type="password" :placeholder="$t('password')" prefix-icon="el-icon-lock"
-              show-password />
+              show-password @input="form.password = $event.replace(/\s/g, '')" />
           </el-form-item>
 
           <div class="form-options">
@@ -98,7 +98,7 @@ export default {
       if (this.form.remember) {
         localStorage.setItem(REMEMBER_KEY, 'true')
         localStorage.setItem(USERNAME_KEY, this.form.username)
-        localStorage.setItem(PASSWORD_KEY, Encrypt(this.form.password))
+        localStorage.setItem(PASSWORD_KEY, Encrypt(this.form.password.replace(/\s/g, '')))
       } else {
         this.clearRememberedCredentials()
       }
@@ -113,9 +113,10 @@ export default {
         if (!valid) return
 
         // 接入真实后端时，取消下面注释并传入实际参数
+        const password = this.form.password.replace(/\s/g, '')
         login({
           username: this.form.username,
-          password: AESEncryptPassword(this.form.password)
+          password: AESEncryptPassword(password)
         }).then(res => {
           if (res.code === RES_SUCCESS) {
             this.saveRememberedCredentials()

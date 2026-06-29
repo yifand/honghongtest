@@ -49,7 +49,7 @@
             :disabled="modalReadonly" />
         </el-form-item>
         <el-form-item :label="$t('partner_code')" prop="companyCode">
-          <el-input v-model="form.companyCode" :placeholder="$t('placeholder_prefix')" :disabled="modalReadonly" />
+          <el-input v-model="form.companyCode" :placeholder="$t('placeholder_prefix')" :disabled="modalReadonly || !!form.id" />
         </el-form-item>
         <el-form-item :label="$t('notes')">
           <el-input v-model="form.note" :placeholder="$t('placeholder_notes')" :disabled="modalReadonly" />

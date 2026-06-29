@@ -7,7 +7,7 @@
     <el-card class="glass filter-card">
       <div class="filter-row">
         <el-input v-model="filters.account" :placeholder="$t('account_name')" size="small" class="filter-input" />
-        <el-select v-model="filters.company" :placeholder="$t('enterprise_name')" size="small" class="filter-input"
+        <el-select v-model="filters.companyCode" :placeholder="$t('enterprise_name')" size="small" class="filter-input"
           clearable>
           <el-option v-for="item in partnerOptions" :key="item.companyCode" :label="item.companyName"
             :value="item.companyCode" />
@@ -93,7 +93,8 @@
           <el-input v-model="passwordForm.account" readonly />
         </el-form-item>
         <el-form-item :label="$t('new_password')" prop="pwd">
-          <el-input v-model="passwordForm.pwd" :placeholder="$t('placeholder_new_password')" />
+          <el-input v-model="passwordForm.pwd" :placeholder="$t('placeholder_new_password')"
+            @input="passwordForm.pwd = $event.replace(/\s/g, '')" />
         </el-form-item>
       </el-form>
       <span slot="footer">
@@ -112,7 +113,7 @@ export default {
   name: 'DashboardAccounts',
   data() {
     return {
-      filters: { account: '', company: null, serviceType: null, status: null, specType: null, accountType: null },
+      filters: { account: '', companyCode: null, serviceType: null, status: null, specType: null, accountType: null },
       currentPage: 1,
       pageSize: 10,
       total: 0,
@@ -198,7 +199,8 @@ export default {
     handleSavePassword() {
       this.$refs.passwordForm.validate(async valid => {
         if (!valid) return
-        const res = await ntripAccountChgpwd(this.passwordForm)
+        const form = { ...this.passwordForm, pwd: this.passwordForm.pwd.replace(/\s/g, '') }
+        const res = await ntripAccountChgpwd(form)
         if (res.code === RES_SUCCESS || res.code === 200) {
           this.$message.success(this.$t('edit_success'))
           this.getNtripAccountSearch()
@@ -224,7 +226,7 @@ export default {
       this.getNtripAccountSearch()
     },
     resetFilter() {
-      this.filters = { account: '', company: null, serviceType: null, status: null, specType: null, accountType: null }
+      this.filters = { account: '', companyCode: null, serviceType: null, status: null, specType: null, accountType: null }
       this.currentPage = 1
       this.getNtripAccountSearch()
     },

@@ -55,7 +55,7 @@
       custom-class="dark-dialog">
       <el-form ref="form" :model="form" :rules="rules" label-position="top" size="small">
         <el-form-item :label="$t('enterprise_name')" prop="companyCode">
-          <el-select v-model="form.companyCode" :placeholder="$t('partner_name')" size="small" class="filter-input"
+          <el-select v-model="form.companyCode" :placeholder="$t('partner_name')" size="small" class="filter-input" :disabled=" !!form.id"
             clearable>
             <el-option v-for="item in partnerOptions" :key="item.companyCode" :label="item.companyName"
               :value="item.companyCode" />
@@ -66,7 +66,8 @@
             <el-input v-model="form.userCode" :placeholder="$t('placeholder_account')" />
           </el-form-item>
           <el-form-item :label="$t('login_password')" prop="password" class="form-col">
-            <el-input v-model="form.password" :placeholder="$t('placeholder_password')" />
+            <el-input v-model="form.password" :placeholder="$t('placeholder_password')"
+              @input="form.password = $event.replace(/\s/g, '')" />
           </el-form-item>
         </div>
         <!-- <div class="form-row">
@@ -177,7 +178,8 @@ export default {
     handleSave() {
       this.$refs.form.validate(async valid => {
         if (!valid) return
-        const res = this.form.id ? await userInfoEdit(this.form) : await userInfoCreate(this.form)
+        const form = { ...this.form, password: this.form.password.replace(/\s/g, '') }
+        const res = this.form.id ? await userInfoEdit(form) : await userInfoCreate(form)
         if (res.code === RES_SUCCESS || res.code === 200) {
           this.$message.success(this.form.id ? this.$t('edit_success') : this.$t('add_success'))
           this.getList()
