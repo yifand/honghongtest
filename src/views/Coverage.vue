@@ -17,13 +17,13 @@
             <div class="mode-toggle">
               <el-button :class="['mode-btn', { active: searchMode === 'coord' }]" size="small"
                 @click="searchMode = 'coord'">{{ $t('by_coords') }}</el-button>
-              <el-button :class="['mode-btn', { active: searchMode === 'keyword' }]" size="small"
+              <el-button v-if="false" :class="['mode-btn', { active: searchMode === 'keyword' }]" size="small"
                 @click="searchMode = 'keyword'">{{ $t('by_keywords') }}</el-button>
             </div>
 
             <!-- Format Toggle (for coordinates) -->
             <div v-if="searchMode === 'coord'" class="format-toggle">
-              <el-button :class="['format-btn', { active: coordFormat === 'deg' }]" size="mini"
+              <el-button v-if="false" :class="['format-btn', { active: coordFormat === 'deg' }]" size="mini"
                 @click="coordFormat = 'deg'">{{ $t('degrees') }}</el-button>
               <!-- <el-button :class="['format-btn', { active: coordFormat === 'dms' }]" size="mini"
                 @click="coordFormat = 'dms'">{{ $t('dms') }}</el-button> -->

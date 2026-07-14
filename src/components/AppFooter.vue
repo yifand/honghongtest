@@ -31,8 +31,8 @@
         <ul>
           <li><router-link to="/knowledge">{{ $t('documentation') }}</router-link></li>
           <li><router-link to="/knowledge">{{ $t('faqs') }}</router-link></li>
-          <li><a href="#">{{ $t('status') }}</a></li>
-          <li><a href="#">{{ $t('contact') }}</a></li>
+          <li v-if="false"><a href="#">{{ $t('status') }}</a></li>
+          <li v-if="false"><a href="#">{{ $t('contact') }}</a></li>
         </ul>
       </div>
     </div>
@@ -110,7 +110,7 @@ export default {
 
 .footer-links ul {
   list-style: none;
-  
+
   li {
     margin-bottom: 8px;
 

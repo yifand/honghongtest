@@ -25,10 +25,9 @@ service.interceptors.request.use(
     const url = config.url || ''
     const isDiffAccountApi = url.includes('/ntripUser/') || url.includes('/account/company') || url.includes('/llm/')
 
-    if (isDiffAccountApi && store.state.token) {
+    if (isDiffAccountApi &&store.state.token) {
       config.headers.token = store.state.token
     } else if (store.state.token) {
-      // 其他接口使用 Authorization header
       config.headers.Authorization = store.state.token
     }
 

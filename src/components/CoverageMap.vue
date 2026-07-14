@@ -7,7 +7,7 @@
 <script>
 /* global L */
 import config from '../../config'
-import { geo_getAreaList } from '@/common/js/api'
+import { geo_getAreaList, geo_ppprtkAreaList } from '@/common/js/api'
 import { RES_SUCCESS } from '@/common/js/const.js'
 
 export default {
@@ -23,7 +23,8 @@ export default {
       currentMarker: null,
       pointsGroup: [],
       polygonList: [],
-      polygonpppRTKList: []
+      polygonpppRTKList: [],
+      pppRTKPointsGroup: []
     }
   },
   watch: {
@@ -139,19 +140,31 @@ export default {
       // this.nrtkLayer.addLayer(marker)
       // })
     },
-    getGeoList() {
-      geo_getAreaList({ code: 'World' }).then(res => {
+    // getGeoList() {
+    //   geo_getAreaList({ code: 'World' }).then(res => {
+    getGeoList(type = 'nrtk') {
+      const api = type === 'ppp-rtk' ? geo_ppprtkAreaList : geo_getAreaList
+      api({ code: 'World' }).then(res => {
         if (res.code === RES_SUCCESS || res.code === 200) {
           const data = res.result.geoAreaResultInfoList
+          const pointsGroup = []
           data.forEach(item => {
             const points = []
             item.areaPointList.forEach(i => {
               points.push([i.lat, i.lon]);
             })
             if (!this._.isEmpty(points)) {
-              this.pointsGroup.push(points);
+              // this.pointsGroup.push(points);
+              pointsGroup.push(points);
             }
           })
+          if (type === 'ppp-rtk') {
+            this.pppRTKPointsGroup = pointsGroup
+            // 获取PPP-RTK数据后立即更新图层
+            this.updatepppRTKLayer()
+          } else {
+            this.pointsGroup = pointsGroup
+          }
         }
 
       })
@@ -179,7 +192,9 @@ export default {
       // 移除旧面
       this.polygonpppRTKList.forEach(poly => this.map.removeLayer(poly));
       this.polygonpppRTKList = [];
-      this.pointsGroup.forEach(item => {
+      // this.pointsGroup.forEach(item => {
+      const points = this.pppRTKPointsGroup.length ? this.pppRTKPointsGroup : this.pointsGroup
+      points.forEach(item => {
         // 绘制多边形（封闭面）
         const polygon = L.polygon(item, {
           color: '#4ade80',     // 边框颜色
@@ -208,9 +223,25 @@ export default {
         }
       } else if (layer === 'ppp-rtk') {
         if (checked) {
-          this.polygonpppRTKList.forEach(p => {
-            if (!this.map.hasLayer(p)) p.addTo(this.map);
-          })
+          // if (this.polygonpppRTKList.length === 0) {
+          //   if (!this.pppRTKPointsGroup.length) {
+          //     this.getGeoList('ppp-rtk')
+          //   } else {
+          //     this.updatepppRTKLayer()
+          //   }
+          // }
+          // this.polygonpppRTKList.forEach(p => {
+          //   if (!this.map.hasLayer(p)) p.addTo(this.map);
+          // })
+          // 检查是否已获取 PPP-RTK 数据
+          if (!this.pppRTKPointsGroup.length) {
+            this.getGeoList('ppp-rtk')
+          } else {
+            this.updatepppRTKLayer()
+            // this.polygonpppRTKList.forEach(p => {
+            //   if (!this.map.hasLayer(p)) p.addTo(this.map);
+            // })
+          }
         } else {
           this.polygonpppRTKList.forEach(p => {
             if (this.map.hasLayer(p)) this.map.removeLayer(p);
@@ -261,9 +292,10 @@ export default {
         if (this.searchMarker) {
           this.map.removeLayer(this.searchMarker)
         }
-        const content = info !== undefined
-          ? `<b>${lat}, ${lng}</b><br/><pre style="color:${info.result ? '#22c55e' : '#ef4444'};font-weight:600;">${info.result ? "在服务范围" : "不在服务范围"}</pre>`
-          : `<b>${lat}, ${lng}</b>`
+        // const content = info !== undefined
+          // ? `<b>${lat}, ${lng}</b><br/><pre style="color:${info.result ? '#22c55e' : '#ef4444'};font-weight:600;">${info.result ? "在服务范围" : "不在服务范围"}</pre>`
+          // : `<b>${lat}, ${lng}</b>`
+          const content = `<b>${lat}, ${lng}</b>`
         this.searchMarker = L.marker([lat, lng]).addTo(this.map)
         this.searchMarker.bindPopup(content).openPopup()
         this.map.setView([lat, lng], 10)

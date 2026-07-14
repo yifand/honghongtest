@@ -94,7 +94,9 @@ export default {
       return this.$store.state.userName
     },
     isAdmin() {
-      return this.role && this.role.includes('9')
+      var ret = this.role && this.role.includes('9')
+      console.log(this.role + ", isAdmin: " + ret)
+      return ret
     },
     roleLabel() {
       return this.isAdmin ? this.$t('role_admin') : this.$t('role_user')

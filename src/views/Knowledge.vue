@@ -9,7 +9,7 @@
       <!-- Search Bar -->
       <div class="search-bar glass">
         <div class="search-row">
-          <el-input v-model="searchQuery" :placeholder="$t('search_placeholder')" size="large" class="search-input" />
+          <el-input v-model="searchQuery" :placeholder="$t('search_placeholder_rag')" size="large" class="search-input" />
           <el-button type="primary" class="search-btn" @click="changeQuetion">{{ $t('search') }}</el-button>
         </div>
       </div>

@@ -41,49 +41,51 @@
     </el-card>
     <el-card class="glass">
       <el-table v-loading="tableLoading" :data="dataList" size="small" class="dark-table">
-        <el-table-column type="index" :label="$t('serial_number')" width="60" />
-        <el-table-column prop="companyName" :label="$t('enterprise_name')" />
+        <el-table-column type="index" :label="$t('serial_number')" width="50" />
+        <el-table-column prop="companyName" :label="$t('enterprise_name')" width="180" />
         <!-- <el-table-column prop="partner" :label="$t('partner_name')" width="120" /> -->
-        <el-table-column prop="orderTitle" :label="$t('order_title')" />
-        <el-table-column prop="orderNo" :label="$t('order_id')" width="130">
-          <template slot-scope="scope">
+        <el-table-column prop="orderTitle" :label="$t('order_title')" width="180" />
+        <el-table-column prop="orderNo" :label="$t('order_id')" width="220">
+          <template slot-scope="scope" >
             <span class="text-blue text-xs">{{ scope.row.orderNo }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="serviceType" :label="$t('service_type')" width="100">
+        <el-table-column prop="serviceType" :label="$t('service_type')" width="90" fixed="right">
           <template slot-scope="scope">
             <el-tag :type="scope.row.serviceType === 'NRTK' ? 'primary' : 'info'" size="mini">{{ scope.row.serviceType
               }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="accountType" :label="$t('account_mode')" />
-        <el-table-column prop="spec" :label="$t('account_spec')">
+        <el-table-column prop="accountType" :label="$t('account_mode')" width="80" fixed="right" />
+        <el-table-column prop="spec" :label="$t('account_spec')" width="80" fixed="right">
           <template slot-scope="scope">{{ scope.row.specType | transText(pecttypes) }}/{{ scope.row.specNumber
           }}</template>
         </el-table-column>
-        <el-table-column prop="quantity" :label="$t('quantity')" width="70" />
-        <el-table-column prop="deviceType" :label="$t('device_type')" width="140" />
-        <el-table-column prop="accountsTxt" :label="$t('account_list')" min-width="160" show-overflow-tooltip>
+        <el-table-column prop="quantity" :label="$t('quantity')" width="50" fixed="right" />
+        <el-table-column prop="deviceType" :label="$t('device_type')" width="100" fixed="right" />
+        <el-table-column prop="accountsTxt" :label="$t('account_list')" width="100" fixed="right" show-overflow-tooltip>
           <template slot-scope="scope">
             <el-button type="text" size="mini" class="text-blue" @click="goToAccounts(scope.row)">{{
               scope.row.accountsTxt }}</el-button>
           </template>
         </el-table-column>
-        <el-table-column prop="orderTime" :label="$t('created_time')" width="110" />
-        <el-table-column prop="status" :label="$t('status')" width="100">
+        <el-table-column prop="orderTime" :label="$t('created_time')" width="140" fixed="right" />
+        <el-table-column prop="status" :label="$t('status')" width="80" fixed="right">
           <template slot-scope="scope">
             <el-tag :type="scope.row.status === 1 ? 'success' : 'warning'" size="mini">
               {{ scope.row.status === 1 ? $t('pushed') : $t('unpushed') }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('actions')" width="180" fixed="right">
+        <el-table-column :label="$t('actions')" width="160" fixed="right">
           <template slot-scope="scope">
             <el-button type="text" size="mini" @click="viewOrderDetail(scope.row)">{{ $t('detail') }}</el-button>
             <el-button v-if="scope.row.status !== 1" type="text" size="mini" class="text-green"
               @click="openOrderModal(scope.row)">{{ $t('edit') }}</el-button>
             <el-button v-if="scope.row.status !== 1" type="text" size="mini" class="text-orange"
               @click="handlePushOrder(scope.row.orderNo)">{{ $t('push') }}</el-button>
+            <el-button v-if="scope.row.status !== 1" type="text" size="mini" class="text-orange"
+                       @click="handleDeleteOrder(scope.row.orderNo)">{{ $t('delete') }}</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -174,9 +176,9 @@
             <div class="detail-item">
               <span class="detail-label">{{ $t('order_status_label') }}</span>
               <span class="detail-value">
-                <el-tag :type="detailRow.status === 'pushed' ? 'success' : 'warning'" size="mini">{{ detailRow.status
+                <el-tag :type="detailRow.status === 1 ? 'success' : 'warning'" size="mini">{{ detailRow.status
                   ===
-                  'pushed' ? $t('pushed') : $t('unpushed') }}</el-tag>
+                  1 ? $t('pushed') : $t('unpushed') }}</el-tag>
               </span>
             </div>
           </div>
@@ -194,7 +196,7 @@
     </el-dialog>
 
     <!-- Order Modal -->
-    <el-dialog :title="form.id ? $t('edit_order') : $t('add_order')" :visible.sync="modalVisible" width="640px"
+    <el-dialog :title="form.id ? $t('edit_order') : $t('add_order')" :visible.sync="modalVisible" width="900px"
       custom-class="dark-dialog">
       <el-form ref="orderForm" :model="form" :rules="rules" label-position="top" size="small">
         <div class="form-row">
@@ -263,14 +265,21 @@
 
 <script>
 // import { DB, saveOrder, pushOrder } from '@/data/dashboardDB'
-import { ntripOrderSearch, ntripOrderCreate, getPartnerSearch, ntripOrderEdit, ntripOrderPush } from '@/common/js/api.js'
+import {
+  ntripOrderSearch,
+  ntripOrderCreate,
+  getPartnerSearch,
+  ntripOrderEdit,
+  ntripOrderPush,
+  ntripOrderDelete, userInfoRemove
+} from '@/common/js/api.js'
 import { RES_SUCCESS, PECTYPEENUM, PUSHTYPEENUM } from '@/common/js/const.js'
 
 export default {
   name: 'DashboardOrders',
   data() {
     return {
-      filters: { orderTitle: '', orderNo: '', serviceType: '', companyCode: '', accountType: '', specType: 3, status: '' },
+      filters: { orderTitle: '', orderNo: '', serviceType: '', companyCode: '', accountType: '', specType: '', status: '' },
       currentPage: 1,
       pageSize: 10,
       modalVisible: false,
@@ -305,6 +314,7 @@ export default {
   computed: {
   },
   mounted() {
+    console.log('specType default value:', this.filters.specType)
     this.getList()
     this.getPartnerList()
   },
@@ -387,6 +397,19 @@ export default {
       }
       )
     },
+    handleDeleteOrder(orderNo) {
+      this.$confirm(this.$t('confirm_delete') + ', orderNo[' + orderNo + ']', '', { type: 'warning' }).then(() => {
+        ntripOrderDelete({ orderNo }).then(res => {
+            if (res.code === RES_SUCCESS || res.code === 200) {
+              this.$message.success(this.$t('order_deleted'))
+              this.getList()
+            } else {
+              this.$message.warning(res.message)
+            }
+          }
+        )
+      }).catch(() => { })
+    },
     viewOrderDetail(row) {
       this.detailRow = row
       this.detailVisible = true
@@ -419,7 +442,7 @@ export default {
       this.modalVisible = false
     },
     resetFilter() {
-      this.filters = { orderTitle: '', orderNo: '', serviceType: '', companyCode: '', accountType: '', specType: 3, status: '' },
+      this.filters = { orderTitle: '', orderNo: '', serviceType: '', companyCode: '', accountType: '', specType: '', status: '' }
         this.currentPage = 1
       this.getList()
     }
@@ -509,7 +532,7 @@ export default {
   margin-bottom: 10px;
 
   .detail-no {
-    font-size: 12px;
+    font-size: 16px;
     color: $blue-500;
     font-weight: 600;
     margin-bottom: 4px;
@@ -522,12 +545,12 @@ export default {
   }
 
   .detail-title {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 700;
     color: #fff;
 
     .detail-label {
-      font-size: 12px;
+      font-size: 18px;
       color: $text-gray-500;
       font-weight: 400;
       margin-right: 6px;
@@ -567,7 +590,7 @@ export default {
     }
 
     .detail-label {
-      font-size: 12px;
+      font-size: 16px;
       color: $text-gray-500;
     }
 

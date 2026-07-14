@@ -20,7 +20,7 @@ if (config.corsmanager.model !== '') {
   PATH_APISERVICE += `/${config.corsmanager.model}`
 }
 export const ApiHostPath = PATH_APISERVICE;
-console.log({PATH_APISERVICE});
+console.log({PATH_APISERVICE,config,PATH_ROOT});
 
 // 登录相关
 const apiPathLogin = `${PATH_APISERVICE}/login`
@@ -71,6 +71,9 @@ const apiPath_Coverage = `${PATH_APISERVICE}/hap/coverage`
 // AI助手
 export const apiPathQAChat = `${PATH_ROOT}/llm/question`
 
+// dashboard
+const api_dashboard_overview= `${PATH_APISERVICE}/dashboard/overview`
+
 //合作伙伴
 const apiPathPartnerCreate = `${PATH_APISERVICE}/partner/create`
 const apiPathPartnerDetail = `${PATH_APISERVICE}/partner/detail`
@@ -89,6 +92,7 @@ const apiPathNtripOrderCreate= `${PATH_APISERVICE}/ntripOrder/create`
 const apiPathNtripOrderSearch= `${PATH_APISERVICE}/ntripOrder/search`
 const apiPathNtripOrderEdit= `${PATH_APISERVICE}/ntripOrder/edit`
 const apiPathNtripOrderPush= `${PATH_APISERVICE}/ntripOrder/push`
+const apiPathNtripOrderDelete= `${PATH_APISERVICE}/ntripOrder/delete`
 
 //账号管理
 const apiPathNtripAccountListByOrderNo= `${PATH_APISERVICE}/ntripAccount/listByOrderNo`
@@ -99,11 +103,10 @@ const apiPathNtripAccountDownload= `${PATH_APISERVICE}/ntripAccount/download`
 //知识库
  export const apiPathRagQuery= `${PATH_APISERVICE}/rag/query`
 
-const api_dashboard_overview= `${PATH_APISERVICE}/dashboard/overview`
-
 export function dashboard_overview () {
   return _getData(api_dashboard_overview)
 }
+
 export function ntripAccountListByOrderNo (params) {
   return _postData(apiPathNtripAccountListByOrderNo, params)
 }
@@ -128,6 +131,9 @@ export function ntripOrderSearch (params) {
 }
 export function ntripOrderPush (params) {
   return _getData(apiPathNtripOrderPush, params)
+}
+export function ntripOrderDelete (params) {
+  return _getData(apiPathNtripOrderDelete, params)
 }
 export function userInfoCreate (params) {
   return _postData(apiPathUserInfoCreate,params)
@@ -307,6 +313,10 @@ export function geo_CodeList () {
 
 export function geo_getAreaList (params) {
   return _getData(apiPath_Geo_getAreaList, params,true)
+}
+
+export function geo_ppprtkAreaList (params) {
+  return _getData(`${PATH_APISERVICE}/geo/ppprtkAreaList`, params,true)
 }
 
 export function getCoverage (params) {

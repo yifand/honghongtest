@@ -160,11 +160,11 @@ a {
   &.is-active {
     color: $blue-500 !important;
   }
- 
+
 }
 .markdown-body{
   color: #fff !important;
-} 
+}
 .el-loading-mask {
   background-color: transparent !important;
 }
@@ -597,6 +597,15 @@ a {
   color: $text-gray-400 !important;
   font-size: 12px !important;
   padding-bottom: 4px !important;
+}
+
+// 表单验证错误提示样式，避免与下方字体重叠
+.el-form-item__error {
+  position: relative !important;
+  margin-top: 4px !important;
+  padding-top: 4px !important;
+  color: #ef4444 !important;
+  font-size: 12px !important;
 }
 
 .el-menu {

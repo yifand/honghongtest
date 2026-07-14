@@ -29,9 +29,9 @@
         </el-table-column>
         <el-table-column prop="password" :label="$t('login_password')" />
         <!-- <el-table-column prop="userCode" :label="$t('user_code')" /> -->
-        <el-table-column prop="serviceInstance" :label="$t('service_instance')" />
+<!--        <el-table-column prop="serviceInstance" :label="$t('service_instance')" />-->
         <!-- <el-table-column prop="poolNo" :label="$t('resource_pool_no')" /> -->
-        <el-table-column prop="resourcePool" :label="$t('resource_pool_name')" />
+<!--        <el-table-column prop="resourcePool" :label="$t('resource_pool_name')" />-->
         <el-table-column prop="createTime" :label="$t('created_time')" min-width="100" />
         <el-table-column prop="updateTime" :label="$t('updated_time')" min-width="100" />
         <el-table-column :label="$t('actions')" width="140" fixed="right">
@@ -55,7 +55,7 @@
       custom-class="dark-dialog">
       <el-form ref="form" :model="form" :rules="rules" label-position="top" size="small">
         <el-form-item :label="$t('enterprise_name')" prop="companyCode">
-          <el-select v-model="form.companyCode" :placeholder="$t('partner_name')" size="small" class="filter-input" :disabled=" !!form.id"
+          <el-select v-model="form.companyCode" :placeholder="$t('partner_name')" size="small" class="filter-input" :disabled="!!form.id"
             clearable>
             <el-option v-for="item in partnerOptions" :key="item.companyCode" :label="item.companyName"
               :value="item.companyCode" />
@@ -63,7 +63,7 @@
         </el-form-item>
         <div class="form-row">
           <el-form-item :label="$t('login_account')" prop="userCode" class="form-col">
-            <el-input v-model="form.userCode" :placeholder="$t('placeholder_account')" />
+            <el-input v-model="form.userCode" :placeholder="$t('placeholder_account')" :disabled="!!form.id" />
           </el-form-item>
           <el-form-item :label="$t('login_password')" prop="password" class="form-col">
             <el-input v-model="form.password" :placeholder="$t('placeholder_password')"

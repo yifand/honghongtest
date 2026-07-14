@@ -85,7 +85,7 @@
           </div>
           <div class="progress-item">
             <div class="progress-header">
-              <span class="progress-label">NRTK Sdk</span>
+              <span class="progress-label">NRTK SDK</span>
               <span>{{ overviewData.nrtkSdkNbr }}</span>
             </div>
             <el-progress :percentage="getPercentage(overviewData.nrtkSdkNbr)" color="#06b6d4" :show-text="false" />

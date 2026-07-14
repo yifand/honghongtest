@@ -63,9 +63,12 @@
         </el-table-column>
         <el-table-column prop="status" :label="$t('activation_status')" width="100">
           <template slot-scope="scope">
-            <el-tag :type="scope.row.activated === 1 ? 'success' : 'info'" size="mini">{{ scope.row.status |
-              transText(statusList)
-            }}</el-tag>
+<!--            <el-tag :type="scope.row.status === 1 ? 'success' : 'info'" size="mini">{{ scope.row.status |-->
+<!--              transText(statusList)-->
+<!--            }}</el-tag>-->
+            <el-tag :type="scope.row.status === 1 ? 'success' : 'info'" size="mini">
+              {{ scope.row.status === 1 ? '已激活' : '未激活' }}
+            </el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="activeTime" :label="$t('activation_time')" width="120" />
