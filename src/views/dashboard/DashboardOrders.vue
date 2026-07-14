@@ -217,13 +217,13 @@
         </div>
         <div class="form-row">
           <el-form-item prop="serviceType" :label="$t('service_type')" class="form-col">
-            <el-select v-model="form.serviceType" style="width: 100%" @change="onSvcTypeChange">
+            <el-select v-model="form.serviceType" :disabled="!!form.id" style="width: 100%" @change="onSvcTypeChange">
               <el-option value="NRTK" label="NRTK" />
               <el-option value="PPP-RTK" label="PPP-RTK" />
             </el-select>
           </el-form-item>
           <el-form-item prop="accountType" :label="$t('account_mode')" class="form-col">
-            <el-select v-model="form.accountType" style="width: 100%" @change="onAccountTypeChange">
+            <el-select v-model="form.accountType" :disabled="!!form.id" style="width: 100%" @change="onAccountTypeChange">
               <el-option v-for="opt in modeOptions" :key="opt" :label="opt" :value="opt" />
             </el-select>
           </el-form-item>
