@@ -260,6 +260,7 @@ export default {
   stack_qty: 'Stack Qty',
   device_type: 'Device Type',
   account_list: 'Account List',
+  account_list_order_no: 'Enter order No.',
   notes: 'Notes',
   status: 'Status',
   pushed: 'Pushed',

@@ -261,6 +261,7 @@ export default {
   stack_qty: '叠加数量',
   device_type: '设备类型',
   account_list: '账号列表',
+  account_list_order_no: '请输入订单号',
   notes: '备注',
   status: '状态',
   pushed: '已推送',

@@ -7,6 +7,7 @@
     <el-card class="glass filter-card">
       <div class="filter-row">
         <el-input v-model="filters.account" :placeholder="$t('account_name')" size="small" class="filter-input" />
+        <el-input v-model="filters.orderNo" :placeholder="$t('order_no_label')" size="small" class="filter-input" />
         <el-select v-model="filters.companyCode" :placeholder="$t('enterprise_name')" size="small" class="filter-input"
           clearable>
           <el-option v-for="item in partnerOptions" :key="item.companyCode" :label="item.companyName"
@@ -52,20 +53,20 @@
         <el-table-column prop="companyName" :label="$t('enterprise_name')" />
         <el-table-column prop="serviceType" :label="$t('service_type')" width="100">
           <template slot-scope="scope">
-            <el-tag :type="scope.row.serviceType === 'NRTK' ? 'primary' : 'info'" size="mini">{{ scope.row.serviceType
-              }}</el-tag>
+            <el-tag :type="scope.row.serviceType === 'NRTK' ? 'prilmary' : 'info'" size="mini">{{ scope.row.serviceType
+            }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="accountType" :label="$t('account_mode')" />
         <el-table-column prop="specType" :label="$t('account_spec')">
           <template slot-scope="scope">{{ scope.row.specType | transText(pecttypes) }}/{{ scope.row.specNumber
-            }}</template>
+          }}</template>
         </el-table-column>
         <el-table-column prop="status" :label="$t('activation_status')" width="100">
           <template slot-scope="scope">
-<!--            <el-tag :type="scope.row.status === 1 ? 'success' : 'info'" size="mini">{{ scope.row.status |-->
-<!--              transText(statusList)-->
-<!--            }}</el-tag>-->
+            <!--            <el-tag :type="scope.row.status === 1 ? 'success' : 'info'" size="mini">{{ scope.row.status |-->
+            <!--              transText(statusList)-->
+            <!--            }}</el-tag>-->
             <el-tag :type="scope.row.status === 1 ? 'success' : 'info'" size="mini">
               {{ scope.row.status === 1 ? '已激活' : '未激活' }}
             </el-tag>
@@ -116,7 +117,7 @@ export default {
   name: 'DashboardAccounts',
   data() {
     return {
-      filters: { account: '', companyCode: null, serviceType: null, status: null, specType: null, accountType: null },
+      filters: { account: '', orderNo: '', companyCode: null, serviceType: null, status: null, specType: null, accountType: null },
       currentPage: 1,
       pageSize: 10,
       total: 0,
@@ -128,7 +129,6 @@ export default {
       pecttypes: PECTYPEENUM,
       partnerOptions: [],
       dataList: [],
-      orderNo: null,
       rules: {
         pwd: [
           { required: true, message: this.$t('please_enter_new_password'), trigger: 'blur' },
@@ -144,13 +144,16 @@ export default {
     this.getPartnerList()
     const orderNoQuery = this.$route.query.orderNo
     if (orderNoQuery) {
-      this.orderNo = decodeURIComponent(orderNoQuery)
+      this.filters.orderNo = decodeURIComponent(orderNoQuery)
       this.getNtripAccountListByOrderNo()
     } else {
       this.getNtripAccountSearch()
     }
   },
   methods: {
+    getList() {
+      this.getNtripAccountSearch()
+    },
     getNtripAccountSearch() {
       this.tableLoading = true
       const params = { ...this.filters, pageNum: this.currentPage, pageSize: this.pageSize }
@@ -167,7 +170,7 @@ export default {
     },
     getNtripAccountListByOrderNo() {
       this.tableLoading = true
-      const params = { ...this.filters, orderNo: this.orderNo, pageNum: this.currentPage, pageSize: this.pageSize }
+      const params = { ...this.filters, orderNo: this.filters.orderNo, pageNum: this.currentPage, pageSize: this.pageSize }
       ntripAccountListByOrderNo(params).then(res => {
         if (res.code === RES_SUCCESS || res.code === 200) {
           this.dataList = res.result.records
@@ -206,7 +209,7 @@ export default {
         const res = await ntripAccountChgpwd(form)
         if (res.code === RES_SUCCESS || res.code === 200) {
           this.$message.success(this.$t('edit_success'))
-          this.getNtripAccountSearch()
+          this.getList()
           this.modalVisible = false
         } else {
           this.$message.warning(res.message)
@@ -217,21 +220,20 @@ export default {
     handleSizeChange(size) {
       this.pageSize = size
       this.currentPage = 1
-      this.getNtripAccountSearch()
+      this.getList()
     },
     handleCurrentChange(page) {
       this.currentPage = page
-      this.getNtripAccountSearch()
-
+      this.getList()
     },
     applyFilter() {
       this.currentPage = 1
-      this.getNtripAccountSearch()
+      this.getList()
     },
     resetFilter() {
-      this.filters = { account: '', companyCode: null, serviceType: null, status: null, specType: null, accountType: null }
+      this.filters = { account: '', orderNo: '', companyCode: null, serviceType: null, status: null, specType: null, accountType: null }
       this.currentPage = 1
-      this.getNtripAccountSearch()
+      this.getList()
     },
     exportAccountsCSV() {
       ntripAccountDownload({ ...this.filters }).then(res => {

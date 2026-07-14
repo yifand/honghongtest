@@ -41,43 +41,48 @@
     </el-card>
     <el-card class="glass">
       <el-table v-loading="tableLoading" :data="dataList" size="small" class="dark-table">
-        <el-table-column type="index" :label="$t('serial_number')" width="50" />
-        <el-table-column prop="companyName" :label="$t('enterprise_name')" width="180" />
+        <el-table-column type="index" :label="$t('serial_number')" min-width="50" />
+        <el-table-column prop="companyName" :label="$t('enterprise_name')" min-width="180" />
         <!-- <el-table-column prop="partner" :label="$t('partner_name')" width="120" /> -->
-        <el-table-column prop="orderTitle" :label="$t('order_title')" width="180" />
-        <el-table-column prop="orderNo" :label="$t('order_id')" width="220">
-          <template slot-scope="scope" >
+        <el-table-column prop="orderTitle" :label="$t('order_title')" min-width="180" />
+        <el-table-column prop="orderNo" :label="$t('order_id')" min-width="220">
+          <template slot-scope="scope">
             <span class="text-blue text-xs">{{ scope.row.orderNo }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="serviceType" :label="$t('service_type')" width="90" fixed="right">
+        <el-table-column prop="serviceType" :label="$t('service_type')" min-width="90">
           <template slot-scope="scope">
             <el-tag :type="scope.row.serviceType === 'NRTK' ? 'primary' : 'info'" size="mini">{{ scope.row.serviceType
-              }}</el-tag>
+            }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="accountType" :label="$t('account_mode')" width="80" fixed="right" />
-        <el-table-column prop="spec" :label="$t('account_spec')" width="80" fixed="right">
+        <el-table-column prop="accountType" :label="$t('account_mode')" min-width="80" />
+        <el-table-column prop="spec" :label="$t('account_spec')" min-width="80">
           <template slot-scope="scope">{{ scope.row.specType | transText(pecttypes) }}/{{ scope.row.specNumber
           }}</template>
         </el-table-column>
-        <el-table-column prop="quantity" :label="$t('quantity')" width="50" fixed="right" />
-        <el-table-column prop="deviceType" :label="$t('device_type')" width="100" fixed="right" />
-        <el-table-column prop="accountsTxt" :label="$t('account_list')" width="100" fixed="right" show-overflow-tooltip>
+        <el-table-column prop="quantity" :label="$t('quantity')" min-width="50" />
+        <el-table-column prop="deviceType" :label="$t('device_type')" min-width="100" />
+        <!-- <el-table-column prop="accountsTxt" :label="$t('account_list')" min-width="160" show-overflow-tooltip>
           <template slot-scope="scope">
-            <el-button type="text" size="mini" class="text-blue" @click="goToAccounts(scope.row)">{{
-              scope.row.accountsTxt }}</el-button>
+            <el-tooltip effect="dark" :content="scope.row.accountsTxt" placement="top" append-to-body>
+              <div class="cell-ellipsis">
+                <el-button type="text" size="mini" class="text-blue" @click="goToAccounts(scope.row)">
+                  {{ scope.row.accountsTxt }}
+                </el-button>
+              </div>
+            </el-tooltip>
           </template>
-        </el-table-column>
-        <el-table-column prop="orderTime" :label="$t('created_time')" width="140" fixed="right" />
-        <el-table-column prop="status" :label="$t('status')" width="80" fixed="right">
+        </el-table-column> -->
+        <el-table-column prop="orderTime" :label="$t('created_time')" min-width="140" fixed="right" />
+        <el-table-column prop="status" :label="$t('status')" min-width="80" fixed="right">
           <template slot-scope="scope">
             <el-tag :type="scope.row.status === 1 ? 'success' : 'warning'" size="mini">
               {{ scope.row.status === 1 ? $t('pushed') : $t('unpushed') }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('actions')" width="160" fixed="right">
+        <el-table-column :label="$t('actions')" min-width="160" fixed="right">
           <template slot-scope="scope">
             <el-button type="text" size="mini" @click="viewOrderDetail(scope.row)">{{ $t('detail') }}</el-button>
             <el-button v-if="scope.row.status !== 1" type="text" size="mini" class="text-green"
@@ -85,7 +90,7 @@
             <el-button v-if="scope.row.status !== 1" type="text" size="mini" class="text-orange"
               @click="handlePushOrder(scope.row.orderNo)">{{ $t('push') }}</el-button>
             <el-button v-if="scope.row.status !== 1" type="text" size="mini" class="text-orange"
-                       @click="handleDeleteOrder(scope.row.orderNo)">{{ $t('delete') }}</el-button>
+              @click="handleDeleteOrder(scope.row.orderNo)">{{ $t('delete') }}</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -166,12 +171,12 @@
         </div>
         <div class="detail-divider" />
         <div class="detail-section">
-          <div class="detail-row">
+          <!-- <div class="detail-row">
             <div class="detail-item full">
               <span class="detail-label">{{ $t('account_list') }}</span>
-              <span class="detail-value">{{ detailRow.accountList || '-' }}</span>
+              <span class="detail-value">{{ detailRow.accountsTxt || '-' }}</span>
             </div>
-          </div>
+          </div> -->
           <div class="detail-row">
             <div class="detail-item">
               <span class="detail-label">{{ $t('order_status_label') }}</span>
@@ -218,7 +223,7 @@
             </el-select>
           </el-form-item>
           <el-form-item prop="accountType" :label="$t('account_mode')" class="form-col">
-            <el-select v-model="form.accountType" style="width: 100%">
+            <el-select v-model="form.accountType" style="width: 100%" @change="onAccountTypeChange">
               <el-option v-for="opt in modeOptions" :key="opt" :label="opt" :value="opt" />
             </el-select>
           </el-form-item>
@@ -400,13 +405,13 @@ export default {
     handleDeleteOrder(orderNo) {
       this.$confirm(this.$t('confirm_delete') + ', orderNo[' + orderNo + ']', '', { type: 'warning' }).then(() => {
         ntripOrderDelete({ orderNo }).then(res => {
-            if (res.code === RES_SUCCESS || res.code === 200) {
-              this.$message.success(this.$t('order_deleted'))
-              this.getList()
-            } else {
-              this.$message.warning(res.message)
-            }
+          if (res.code === RES_SUCCESS || res.code === 200) {
+            this.$message.success(this.$t('order_deleted'))
+            this.getList()
+          } else {
+            this.$message.warning(res.message)
           }
+        }
         )
       }).catch(() => { })
     },
@@ -443,7 +448,7 @@ export default {
     },
     resetFilter() {
       this.filters = { orderTitle: '', orderNo: '', serviceType: '', companyCode: '', accountType: '', specType: '', status: '' }
-        this.currentPage = 1
+      this.currentPage = 1
       this.getList()
     }
   }
@@ -616,6 +621,25 @@ export default {
   &:hover {
     background: rgba(255, 255, 255, 0.1) !important;
     color: #fff !important;
+  }
+}
+
+// 表格单元格单行省略
+.cell-ellipsis {
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+
+  // 按钮行内自适应
+  ::v-deep .el-button {
+    max-width: 100%;
+    padding: 0;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 
