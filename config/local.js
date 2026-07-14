@@ -2,7 +2,7 @@
 module.exports = {
   __PROJECT: 'hapsbas',
   publicPath: '',
-  api_path: 'http://localhost:9020',
+  api_path: '/api',
   token: '21b5965057739daf51d329cf531ff092',
   corsmanager: {
     model: '',

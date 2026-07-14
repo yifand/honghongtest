@@ -33,11 +33,13 @@
             <div v-if="searchMode === 'coord' && coordFormat === 'deg'" class="input-group">
               <div class="input-item">
                 <label>{{ $t('longitude') }}</label>
-                <el-input v-model="longitude" size="small" :placeholder="$t('longitude_placeholder')" />
+                <el-input v-model="longitude" size="small" :placeholder="$t('longitude_placeholder')"
+                  @input="onDecimalInput('longitude', $event)" />
               </div>
               <div class="input-item">
                 <label>{{ $t('latitude') }}</label>
-                <el-input v-model="latitude" size="small" :placeholder="$t('latitude_placeholder')" />
+                <el-input v-model="latitude" size="small" :placeholder="$t('latitude_placeholder')"
+                  @input="onDecimalInput('latitude', $event)" />
               </div>
             </div>
 
@@ -163,12 +165,12 @@ export default {
             return
           }
         } else {
-          lng = parseFloat(this.longitude)
-          lat = parseFloat(this.latitude)
-          if (isNaN(lat) || isNaN(lng)) {
+          if (!this.isValidDecimal(this.longitude) || !this.isValidDecimal(this.latitude)) {
             this.$message.warning(this.$t('enter_valid_coords'))
             return
           }
+          lng = parseFloat(this.longitude)
+          lat = parseFloat(this.latitude)
         }
         if (lng < -180 || lng > 180 || lat < -90 || lat > 90) {
           this.$message.warning(this.$t('coords_out_of_range'))
@@ -197,6 +199,17 @@ export default {
       if (this.$refs.coverageMap) {
         this.$refs.coverageMap.toggleLayer(layer, checked)
       }
+    },
+    onDecimalInput(field, value) {
+      let filtered = String(value)
+        .replace(/[^-\d.]/g, '')
+        .replace(/\.{2,}/g, '.')
+        .replace(/(\..*)\./g, '$1')
+        .replace(/(-.*)-/g, '$1')
+      this[field] = filtered
+    },
+    isValidDecimal(value) {
+      return /^-?\d+(\.\d+)?$/.test(value)
     },
     dmsToDecimal(value) {
       if (value === null || value === undefined || String(value).trim() === '') return NaN
