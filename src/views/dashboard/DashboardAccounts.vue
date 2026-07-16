@@ -112,6 +112,7 @@
 <script>
 import { STATUSENUM, RES_SUCCESS, PECTYPEENUM, } from '@/common/js/const'
 import { ntripAccountListByOrderNo, ntripAccountDownload, ntripAccountSearch, ntripAccountChgpwd, getPartnerSearch } from '@/common/js/api.js'
+import { AESDecryptPassword } from '@/common/js/crypto.js'
 import { validatePasswordComplexity } from '@/common/js/utils.js'
 export default {
   name: 'DashboardAccounts',
@@ -193,7 +194,13 @@ export default {
       )
     },
     showPassword(row) {
-      this.$alert(this.$t('account_label') + ': ' + row.user + '\n' + this.$t('password_label') + ': ' + row.pwd, this.$t('account_password_title'), { confirmButtonText: this.$t('ok') }).catch(() => { })
+      let pwd = row.pwd
+      try {
+        pwd = AESDecryptPassword(row.pwd)
+      } catch (e) {
+        pwd = row.pwd
+      }
+      this.$alert(this.$t('account_label') + ': ' + row.user + '\n' + this.$t('password_label') + ': ' + pwd, this.$t('account_password_title'), { confirmButtonText: this.$t('ok') }).catch(() => { })
     },
     openPasswordModal(row) {
       this.passwordForm = { id: row.user, account: row.user, pwd: '' }

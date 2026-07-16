@@ -57,3 +57,12 @@ export const AESEncryptPassword = function (word) {
   })
   return encrypted.toString()
 }
+
+export const AESDecryptPassword = function (word) {
+  const key = CryptoJS.enc.Utf8.parse('P!zsX*tV&u6%Ns^H')
+  const decrypt = CryptoJS.AES.decrypt(word, key, {
+    mode: CryptoJS.mode.ECB,
+    padding: CryptoJS.pad.Pkcs7
+  })
+  return decrypt.toString(CryptoJS.enc.Utf8)
+}
